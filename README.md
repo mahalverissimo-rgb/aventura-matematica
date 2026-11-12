@@ -13,3 +13,10 @@ Jogo educativo de matemática e enigmas para crianças de 6 a 8 anos.
 
 ## Rodar localmente
 Basta abrir `index.html` no navegador. Não precisa instalar nada.
+
+## Manual
+📘 [Manual do jogo (PDF) – v1.1](docs/Manual-Aventura-Matemagica-v1.1.pdf)
+
+## Versões
+- **1.1** – nome do jogador na abertura; número grande nas somas dos níveis 1 e 2; versão exibida nas Configurações; manual em PDF.
+- **1.0** – primeira versão jogável.
