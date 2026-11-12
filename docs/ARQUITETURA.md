@@ -42,13 +42,17 @@ armazenamento (`loadProgress(storage)` / `saveProgress(storage)`).
 - **Mesclagem** (`sync.js`): melhor nota de cada nível, itens somados; moedas/nome/configurações do lado mais recente.
 - **Apagar conta:** função `delete_my_account()` no banco apaga o usuário e, em cascata, os perfis.
 
-### Pendências antes de abrir para outras famílias
-1. **E-mail próprio (SMTP):** o envio de e-mails padrão do Supabase só entrega para membros da organização
-   e no máximo 2 por hora. É preciso ligar um serviço de e-mail (ex.: Resend ou Brevo) em
-   *Authentication → Emails → SMTP*. Com SMTP próprio também dá para colocar o **código** no e-mail
-   (`{{ .Token }}`), útil para os apps de celular.
-2. **Política de privacidade e termos** (v1.5).
-3. Login com Apple/Google (opcional, junto com os apps na v1.4).
+### E-mail de acesso
+- Enviado pelo **Resend** (integração oficial Resend ↔ Supabase), remetente
+  **Aventura Matemágica <acesso@veritech.me>**, domínio `veritech.me` verificado (DKIM/SPF em
+  `resend._domainkey`, `send`, `rsend`; DMARC `p=none`). DNS no Squarespace.
+- Modelos "Magic link or OTP" e "Confirm sign up" em português, com **código de 6 dígitos** (`{{ .Token }}`)
+  no assunto e no corpo, e botão "Entrar no jogo" (`{{ .ConfirmationURL }}`).
+- Limite padrão do Supabase com SMTP próprio: 30 e-mails por hora (ajustável em *Authentication → Rate Limits*).
+
+### Pendências
+1. **Política de privacidade e termos** (v1.5).
+2. Login com Apple/Google (opcional, junto com os apps na v1.4).
 
 ## Como trabalhar
 | Comando | O que faz |

@@ -250,7 +250,7 @@ export function renderAccountBits() {
 function friendlyError(e) {
   if (e.code === "offline") return "Sem internet. Tente de novo quando estiver conectado.";
   if (e.status === 429 || /rate limit/i.test(e.message)) return "Muitos e-mails em pouco tempo. Espere alguns minutos e tente de novo.";
-  if (/not authorized/i.test(e.message)) return "Este e-mail ainda não pode receber o acesso: o envio de e-mails do jogo está em modo de teste.";
+  if (/not authorized/i.test(e.message)) return "Não foi possível enviar para este e-mail. Confira o endereço e tente de novo.";
   if (/expired|invalid/i.test(e.message)) return "Código inválido ou vencido. Peça um novo e-mail.";
   if (/Limite de 6/.test(e.message)) return "A conta já tem 6 jogadores.";
   return "Algo deu errado: " + e.message;

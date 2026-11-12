@@ -9,6 +9,7 @@
 - **Funciona sem internet:** o progresso fica no aparelho e sincroniza quando a conexão volta. Se jogar em dois aparelhos, fica sempre a melhor nota de cada nível.
 - **Apagar conta e todos os dados** e remover jogadores, dentro da Área dos Pais.
 - Sem conta, o jogo continua funcionando como antes.
+- E-mail de acesso em português, com código de 6 dígitos e botão, enviado por **Aventura Matemágica <acesso@veritech.me>** (Resend).
 - Técnico: banco no Supabase (`supabase/schema.sql`) com regras de segurança por conta (RLS); cliente próprio sem dependências (`js/cloud.js`); 58 testes de lógica e teste de ponta a ponta com dois aparelhos simulados.
 
 ## 1.2 — 12/11/2026
