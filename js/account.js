@@ -11,6 +11,7 @@ import {
 import { sfx } from "./audio.js";
 import { go, refresh, overlay, closeOverlay, toast } from "./ui.js";
 import { parentGate } from "./screens.js";
+import { isNativeApp } from "./native.js";
 
 const ACTIVE_PROFILE_KEY = "aventura-matemagica-perfil-ativo";
 const GUEST_IMPORTED_KEY = "aventura-matemagica-convidado-importado";
@@ -262,6 +263,8 @@ export function openAccount() {
 }
 
 function redirectUrl() {
+  // No app de celular o link do e-mail abriria o navegador, então o app usa o código.
+  if (isNativeApp()) return CLOUD_REDIRECT;
   return /^https?:$/.test(location.protocol) ? location.origin + location.pathname : CLOUD_REDIRECT;
 }
 
@@ -291,8 +294,9 @@ function loginPanel() {
 function codePanel(email) {
   overlay(`<p style="font-size:56px;margin:0">📧</p><h2>Confira seu e-mail</h2>
     <p>Enviamos um e-mail para <b>${esc(email)}</b>.</p>
-    <p>Abra o e-mail <b>neste aparelho</b> e toque no link de acesso. O jogo vai abrir já conectado.</p>
-    <p class="acc-note">Se o e-mail trouxer um código de números, digite aqui:</p>
+    ${isNativeApp()
+      ? `<p>Digite aqui o <b>código de 6 números</b> que veio no e-mail:</p>`
+      : `<p>Digite o <b>código de 6 números</b> que veio no e-mail, ou abra o e-mail <b>neste aparelho</b> e toque em "Entrar no jogo".</p>`}
     <input class="name-input" id="acc-code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="código">
     <div class="btncol"><button class="btn" id="acc-verify">Entrar com o código</button><button class="btn ghost" id="acc-back">Voltar</button></div>`);
   $("#acc-back").onclick = loginPanel;

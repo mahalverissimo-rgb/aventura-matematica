@@ -1,0 +1,20 @@
+{
+  "appId": "me.veritech.aventuramatematica",
+  "appName": "Aventura Matemágica",
+  "webDir": "www",
+  "backgroundColor": "#2b1b5a",
+  "android": {
+    "allowMixedContent": false
+  },
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#2b1b5a"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "backgroundColor": "#2b1b5a",
+      "showSpinner": false
+    }
+  }
+}
