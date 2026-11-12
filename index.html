@@ -72,8 +72,13 @@
   .qtext{font-size:25px;font-weight:700;line-height:1.15}
   .qvisual{font-size:44px;line-height:1.2;font-weight:800;word-break:break-word}
   .qvisual.eq{font-size:58px}
-  .qvisual .grp{display:inline-block;max-width:46%;vertical-align:middle;font-size:30px;line-height:1.15}
-  .qvisual .op{display:inline-block;vertical-align:middle;margin:0 6px;font-size:44px}
+  .qvisual .grp{display:inline-flex;flex-direction:column;align-items:center;max-width:44%;vertical-align:bottom;justify-content:flex-end;font-size:30px;line-height:1.15}
+  .qvisual .grp .bignum{font-size:64px;line-height:1;margin-top:6px;color:#5b2a86}
+  .qvisual .eqline{display:block;font-size:56px;margin-top:8px;color:#5b2a86}
+  .hello{color:#fff;font-size:24px;font-weight:800;text-align:center}
+  .name-input{font:inherit;font-size:28px;font-weight:800;width:100%;text-align:center;border-radius:18px;border:3px solid #d9c8ff;padding:10px;outline:none;color:#2a2140;user-select:text;-webkit-user-select:text}
+  .name-input:focus{border-color:var(--gold2)}
+  .qvisual .op{display:inline-block;vertical-align:bottom;margin:0 6px 14px;font-size:44px}
   .qvisual svg{vertical-align:middle}
   .options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
   .opt{background:#fff;border-radius:22px;min-height:84px;font-size:38px;font-weight:800;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;padding:6px;transition:transform .1s}
@@ -127,6 +132,7 @@
       <p>Salve o reino com feitiços de matemática!</p>
     </div>
     <div class="center">
+      <div class="hello" id="home-hello"></div>
       <div class="avatar-line" style="justify-content:center"><span class="avatar" id="home-avatar"></span><span id="home-rank"></span></div>
       <button class="btn big" id="btn-play">▶ Jogar</button>
     </div>
@@ -207,6 +213,7 @@
     <div style="overflow-y:auto;flex:1">
       <div class="set-row">🎵 Sons <span class="toggle" data-set="sound"></span></div>
       <div class="set-row">🔊 Ler perguntas em voz alta <span class="toggle" data-set="voice"></span></div>
+      <div class="set-row">🧒 Nome do jogador <button class="btn small" id="btn-name">✏️ <span id="set-name"></span></button></div>
       <div class="set-row">🔠 Letras maiores <span class="toggle" data-set="bigText"></span></div>
       <div class="set-row">📺 Anúncios (área dos pais) <span class="toggle" data-set="ads" data-parent="1"></span></div>
       <h2 style="font-size:22px;margin:16px 0 6px">👨‍👩‍👧 Para os pais</h2>
@@ -241,7 +248,7 @@ const rep = (e,n) => Array(n).fill(e).join("");
 /* ---------- salvamento ---------- */
 const SAVE_KEY = "aventura-matemagica-v1";
 const defaults = () => ({ coins:0, stars:{}, owned:["none","owl"], hat:"none", pet:"owl", hero:"🧒",
-  levelsDone:0, tutorialSeen:false, settings:{sound:true, voice:false, bigText:false, ads:true} });
+  levelsDone:0, tutorialSeen:false, name:"", settings:{sound:true, voice:false, bigText:false, ads:true} });
 let P = defaults();
 function load(){ try{ const raw=localStorage.getItem(SAVE_KEY); if(raw){ const d=JSON.parse(raw); P=Object.assign(defaults(),d); P.settings=Object.assign(defaults().settings,d.settings||{});} }catch(e){} }
 function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(P)); }catch(e){} }
@@ -299,7 +306,7 @@ const GEN = [
     if(!sub){
       let a=rnd(1,max-1), b=rnd(1,max-a);
       if(l<=2){ const o=pick(OBJ);
-        return Q("Quantos tem ao todo?", `<span class="grp">${rep(o,a)}</span><span class="op">+</span><span class="grp">${rep(o,b)}</span>`,
+        return Q("Quantos tem ao todo?", `<span class="grp"><span>${rep(o,a)}</span><span class="bignum">${a}</span></span><span class="op">+</span><span class="grp"><span>${rep(o,b)}</span><span class="bignum">${b}</span></span><span class="eqline">${a} + ${b} = ?</span>`,
           numOptions(a+b,4,1), a+b, `Conte tudo junto: ${a} e mais ${b}.`, {speech:`${a} mais ${b}`}); }
       return Q("Lance o feitiço da soma!", `${a} + ${b} = ?`, numOptions(a+b,4,1), a+b, `Comece no ${Math.max(a,b)} e conte mais ${Math.min(a,b)} nos dedos.`, {eq:true});
     }
@@ -431,6 +438,8 @@ function refresh(){
   $$("[data-banner]").forEach(e=>e.classList.toggle("hidden", !P.settings.ads));
   ["#home-avatar","#map-avatar","#shop-avatar"].forEach(s=>$(s).innerHTML=avatarHTML());
   $("#home-rank").textContent=rank();
+  $("#home-hello").textContent = P.name ? `Olá, ${P.name}! 👋` : "";
+  $("#set-name").textContent = P.name || "definir";
   document.body.style.fontSize = P.settings.bigText?"112%":"";
   $$(".qtext").forEach(e=>e.style.fontSize=P.settings.bigText?"30px":"");
   if(current==="map") renderMap();
@@ -483,7 +492,7 @@ function nextQuestion(){
   q.options.forEach(op=>{ const b=document.createElement("button"); b.className="opt"; b.innerHTML=op.label; b.dataset.v=op.value;
     b.onclick=()=>answer(b,op.value); o.appendChild(b); });
   $("#g-mascot").textContent=petE();
-  say(pick(["Você consegue! ✨","Pense com calma…","Vamos lá, mago!","Use sua magia matemática!"]));
+  say(pick([`Você consegue, ${nm()}! ✨`,"Pense com calma…",`Vamos lá, ${nm()}!`,"Use sua magia matemática!"]));
   hintTimer=setTimeout(()=>say("Precisa de ajuda? Toque em mim! 💡"),12000);
   if(P.settings.voice) speak(q.text+". "+(q.speech||stripTags(q.visual)));
 }
@@ -494,7 +503,7 @@ function answer(btn,val){
   const q=G.current;
   if(String(val)===String(q.answer)){
     G.locked=true; btn.classList.add("right"); sfx.ok(); burst(btn,6);
-    say(pick(["Isso! Feitiço perfeito! 🌟","Uau, mandou bem! 🎉","Magia certeira! ✨","Excelente! 🧙"]));
+    say(pick(["Isso! Feitiço perfeito! 🌟",`Uau, ${nm()}, mandou bem! 🎉`,"Magia certeira! ✨",`Excelente, ${nm()}! 🧙`]));
     G.q++; setTimeout(nextQuestion,900);
   } else {
     btn.classList.add("wrong"); sfx.bad(); G.mistakes++; G.wrongThisQ++; G.lives--;
@@ -526,7 +535,7 @@ function winLevel(){
   const endGame = last && G.r===REGIONS.length-1 && firstTime;
   const regionDone = last && firstTime && !endGame;
   overlay(`
-    <h2>${endGame?"🏆 Você salvou o reino!":"Nível concluído!"}</h2>
+    <h2>${endGame?`🏆 ${nm()}, você salvou o reino!`:`Muito bem, ${nm()}!`}</h2><p style="margin:0">Nível concluído!</p>
     <div class="bigstars"><span>⭐</span><span>⭐</span><span>⭐</span></div>
     <p><b>+${coins} 🪙</b>${firstTime?" (inclui bônus de primeira vez!)":""}</p>
     ${regionDone?`<p>🎉 Nova região desbloqueada: <b>${REGIONS[G.r+1].ico} ${REGIONS[G.r+1].nome}</b>!</p>`:""}
@@ -635,10 +644,23 @@ function burst(el,n){ const r=el.getBoundingClientRect(); for(let i=0;i<n;i++){ 
   c.style.cssText=`position:fixed;left:${r.left+r.width/2}px;top:${r.top+r.height/2}px;font-size:22px;z-index:30;pointer-events:none;transition:all .7s ease-out`;
   document.body.appendChild(c); requestAnimationFrame(()=>{ c.style.transform=`translate(${rnd(-80,80)}px,${rnd(-90,10)}px)`; c.style.opacity=0; }); setTimeout(()=>c.remove(),800);} }
 
+/* ---------- nome do jogador ---------- */
+function nm(){ return P.name || "mago"; }
+function askName(then){
+  overlay(`<p style="font-size:64px;margin:0">🧙‍♂️</p><h2>Qual é o seu nome?</h2>
+    <p>O Mago Sábio quer saber quem vai salvar o reino!</p>
+    <input class="name-input" id="nm-in" maxlength="14" placeholder="Digite seu nome" autocomplete="off" value="${(P.name||"").replace(/"/g,"")}">
+    <div class="btncol"><button class="btn" id="nm-ok">Pronto! ✨</button></div>`);
+  const inp=$("#nm-in"); setTimeout(()=>{ try{inp.focus();}catch(e){} },100);
+  const ok=()=>{ const v=inp.value.trim().replace(/[<>&"]/g,""); if(!v){ sfx.bad(); toast("Escreva seu nome 🙂"); return; }
+    P.name=v.charAt(0).toUpperCase()+v.slice(1); save(); sfx.ok(); closeOverlay(); refresh(); then(); };
+  $("#nm-ok").onclick=ok; inp.onkeydown=e=>{ if(e.key==="Enter") ok(); };
+}
+
 /* ---------- tutorial ---------- */
 function tutorial(){
   const steps=[
-    ["🧙‍♂️","Olá, jovem aprendiz! Eu sou o Mago Sábio."],
+    ["🧙‍♂️",`Olá, ${nm()}! Eu sou o Mago Sábio e você é meu novo aprendiz.`],
     ["😈","O vilão Bagunço espalhou confusão e enigmas por todo o Reino Mágico!"],
     ["🦉","Eu sou o Corujito! Vou te dar dicas quando você precisar. É só tocar em mim."],
     ["⭐","Acerte os desafios para ganhar estrelas e moedas. Sem erros = 3 estrelas!"],
@@ -652,7 +674,8 @@ function tutorial(){
 }
 
 /* ---------- eventos ---------- */
-$("#btn-play").onclick=()=>{ sfx.tap(); if(!P.tutorialSeen) tutorial(); else go("map"); };
+$("#btn-play").onclick=()=>{ sfx.tap(); if(!P.name) askName(()=>{ if(!P.tutorialSeen) tutorial(); else go("map"); }); else if(!P.tutorialSeen) tutorial(); else go("map"); };
+$("#btn-name").onclick=()=>{ sfx.tap(); askName(()=>{}); };
 $("#btn-shop-home").onclick=()=>{ sfx.tap(); go("shop"); };
 $("#btn-settings-home").onclick=()=>{ sfx.tap(); go("settings"); };
 $("#btn-help").onclick=()=>{ sfx.tap(); tutorial(); };
