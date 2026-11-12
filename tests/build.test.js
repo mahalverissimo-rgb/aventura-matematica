@@ -16,7 +16,7 @@ test("build gera arquivo único com a versão no nome", () => {
 test("main.js é o último módulo e todos os módulos entram no pacote", () => {
   const order = moduleOrder("js/main.js");
   assert.equal(order.at(-1), "js/main.js");
-  for (const m of ["util", "config", "shapes", "challenges", "progress", "audio", "ui", "screens", "game", "ads", "account", "cloud", "sync", "cloud-config"]) {
+  for (const m of ["util", "config", "shapes", "challenges", "progress", "audio", "ui", "screens", "game", "ads", "account", "cloud", "sync", "cloud-config", "native"]) {
     assert.ok(order.includes(`js/${m}.js`), `faltou js/${m}.js`);
   }
 });

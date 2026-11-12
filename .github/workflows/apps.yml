@@ -1,0 +1,101 @@
+name: Apps (Android e iPhone)
+
+on:
+  pull_request:
+  push:
+    branches: [main, 'v*']
+  workflow_dispatch:
+
+jobs:
+  android:
+    name: Android (.apk para testar)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Versão do jogo
+        run: echo "VERSAO=$(node -p "require('fs').readFileSync('js/config.js','utf8').match(/VERSION = \"([^\"]+)\"/)[1]")" >> $GITHUB_ENV
+      - name: Instalar Capacitor
+        run: npm install --no-audit --no-fund
+      - name: Preparar arquivos do jogo
+        run: npm run build:www
+      - name: Criar projeto Android
+        run: npx cap add android
+      - name: Ícones e tela de abertura
+        run: npx capacitor-assets generate --android --iconBackgroundColor '#2b1b5a' --splashBackgroundColor '#2b1b5a'
+      - name: Número da versão no app
+        run: |
+          CODE=$(echo "$VERSAO" | awk -F. '{print $1*100+$2}')
+          sed -i "s/versionCode [0-9]*/versionCode $CODE/; s/versionName \"[^\"]*\"/versionName \"$VERSAO\"/" android/app/build.gradle
+          grep -E "versionCode|versionName" android/app/build.gradle
+      - name: Sincronizar
+        run: npx cap sync android
+      - name: Gerar .apk
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+      - name: Renomear com a versão
+        run: |
+          mkdir -p saida
+          cp android/app/build/outputs/apk/debug/app-debug.apk "saida/aventura-matematica-v${VERSAO}.apk"
+          ls -la saida
+      - name: Conferir o .apk (jogo dentro e versão certa)
+        run: |
+          APK="saida/aventura-matematica-v${VERSAO}.apk"
+          unzip -l "$APK" | grep -q "assets/public/index.html"
+          unzip -l "$APK" | grep -q "assets/public/js/main.js"
+          AAPT=$(ls $ANDROID_HOME/build-tools/*/aapt | tail -1)
+          $AAPT dump badging "$APK" | head -3
+          $AAPT dump badging "$APK" | grep -q "versionName='${VERSAO}'"
+          $AAPT dump badging "$APK" | grep -q "package: name='me.veritech.aventuramatematica'"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-v${{ env.VERSAO }}
+          path: saida/*.apk
+
+  ios:
+    name: iPhone (compila no simulador)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Versão do jogo
+        run: echo "VERSAO=$(node -p "require('fs').readFileSync('js/config.js','utf8').match(/VERSION = \"([^\"]+)\"/)[1]")" >> $GITHUB_ENV
+      - name: Instalar Capacitor
+        run: npm install --no-audit --no-fund
+      - name: Preparar arquivos do jogo
+        run: npm run build:www
+      - name: Criar projeto iPhone
+        run: npx cap add ios
+      - name: Ícones e tela de abertura
+        run: npx capacitor-assets generate --ios --iconBackgroundColor '#2b1b5a' --splashBackgroundColor '#2b1b5a'
+      - name: Número da versão no app
+        run: |
+          find ios -name project.pbxproj -exec sed -i '' "s/MARKETING_VERSION = [^;]*;/MARKETING_VERSION = ${VERSAO};/g" {} \;
+          grep -h "MARKETING_VERSION" $(find ios -name project.pbxproj) | head -2
+      - name: Sincronizar
+        run: npx cap sync ios
+      - name: Compilar para o simulador (sem assinatura)
+        run: |
+          cd ios/App
+          if [ -d App.xcworkspace ]; then TARGET="-workspace App.xcworkspace"; else TARGET="-project App.xcodeproj"; fi
+          set -o pipefail
+          xcodebuild $TARGET -scheme App -configuration Debug -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build | tail -n 30
+      - name: Empacotar projeto para abrir no Xcode
+        run: |
+          rm -rf ios/App/build ios/DerivedData
+          # leva junto os arquivos do Capacitor que o projeto do Xcode usa (node_modules/@capacitor)
+          zip -r -q -y "projeto-iphone-v${VERSAO}.zip" ios node_modules/@capacitor -x "*/build/*"
+          ls -la projeto-iphone-v*.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: projeto-iphone-v${{ env.VERSAO }}
+          path: projeto-iphone-v*.zip

@@ -9,6 +9,7 @@ import { askName, tutorial, bindSettings } from "./screens.js";
 import { play, startLevel, giveHint, pauseGame, speakCurrentQuestion } from "./game.js";
 import { rewardedAd } from "./ads.js";
 import { initAccount, afterStart, openAccount, chooserPanel, account } from "./account.js";
+import { initNative, handleBackButton, isNativeApp } from "./native.js";
 
 function startPlaying() {
   if (!P.tutorialSeen) tutorial(); else go("map");
@@ -37,6 +38,7 @@ function bindEvents() {
 }
 
 drawStarsBackground();
+initNative();
 bindEvents();
 const start = initAccount();
 loadProgress();
@@ -44,4 +46,4 @@ refresh();
 afterStart(start);
 
 // Acesso para os testes automatizados (tests/e2e).
-window.__AM = { VERSION, GEN, REGIONS, P: () => P, G: () => play.G, startLevel, account };
+window.__AM = { VERSION, GEN, REGIONS, P: () => P, G: () => play.G, startLevel, account, handleBackButton, isNativeApp };
