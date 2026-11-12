@@ -23,6 +23,11 @@ js/
   cloud.js          cliente do Supabase (login por e-mail + tabela child_profiles), só com fetch
   cloud-config.js   endereço e chave PÚBLICA do Supabase
   sync.js           junta progresso do aparelho com o da nuvem          (puro, testado)
+native.js         (em js/) app de celular: botão voltar, detecção do app, registro do service worker
+sw.js               guarda o jogo no aparelho (funciona sem internet)
+manifest.webmanifest app instalável (nome, ícones, cores)
+capacitor.config.json / scripts/build-www.mjs   apps iOS/Android (ver docs/APPS.md)
+assets/, icons/     ícone (vetor em assets/icon.svg), ícones do navegador e tela de abertura
 supabase/schema.sql tabela, regras de segurança (RLS), limite de perfis, apagar conta
 scripts/build.mjs   gera dist/aventura-matematica-v<versão>.html (arquivo único)
 tests/              testes de lógica (node --test) e e2e/smoke.py (navegador)
@@ -61,6 +66,8 @@ armazenamento (`loadProgress(storage)` / `saveProgress(storage)`).
 | `npm run build` | gera o arquivo único em `dist/` |
 | `python3 tests/e2e/smoke.py` | joga no navegador (precisa de Playwright) |
 | `python3 tests/e2e/account.py` | testa a Conta da família com Supabase simulado e 2 aparelhos |
+| `python3 tests/e2e/mobile.py` | sem internet (service worker), botão voltar e login por código no app |
+| `npm run android` / `npm run ios` | abre o app no Android Studio / Xcode (precisa de `npm install`) |
 | `python3 -m http.server` | serve o jogo em http://localhost:8000 |
 
 > Abrir `index.html` com dois cliques **não funciona** (navegadores bloqueiam módulos em
@@ -71,7 +78,6 @@ armazenamento (`loadProgress(storage)` / `saveProgress(storage)`).
 - Cada pedido novo = nova versão, um PR, entrada no `CHANGELOG.md` e arquivos entregues com a versão no nome.
 
 ## Próximas etapas
-- **v1.4** – apps iOS/Android com Capacitor.
 - **v1.5** – materiais das lojas (privacidade, termos, prints).
 - **v2.0** – publicação. Antes disso, rever a monetização: as regras da Apple para a categoria
   Kids e o ECA Digital restringem anúncios para crianças.

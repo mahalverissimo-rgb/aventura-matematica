@@ -1,5 +1,15 @@
 # Histórico de versões
 
+## 1.4 — 12/11/2026
+**Apps de celular (para testar, ainda fora das lojas).**
+- **App instalável pelo navegador:** ícone próprio, tela cheia e funciona **sem internet** depois da primeira visita (iPhone e Android).
+- **App Android:** o GitHub gera um `.apk` a cada PR, para instalar direto no celular, sem Google Play.
+- **App iPhone:** projeto pronto para abrir no Xcode e instalar no próprio iPhone com Apple ID gratuito; o GitHub confere se compila.
+- Ícone novo em vetor e tela de abertura.
+- Tela respeita o entalhe e a barra inferior dos celulares; botão **voltar** do Android.
+- No app, a Conta da família entra pelo **código de 6 números** do e-mail.
+- Técnico: Capacitor 7 (`capacitor.config.json`, `scripts/build-www.mjs`), service worker (`sw.js`), workflow `apps.yml`; 64 testes de lógica e novo teste de ponta a ponta `mobile.py`. Guia em `docs/APPS.md`.
+
 ## 1.3 — 12/11/2026
 **Conta da família:** o progresso pode ficar salvo na nuvem e continuar em qualquer aparelho.
 - Conta do **adulto responsável**, sem senha: entra pelo link enviado por e-mail (ou por código, quando o e-mail trouxer um).

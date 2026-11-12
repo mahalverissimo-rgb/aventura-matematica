@@ -3,6 +3,9 @@
 Jogo educativo de matemática e enigmas para crianças de 6 a 8 anos.
 
 **Jogar no navegador:** https://mahalverissimo-rgb.github.io/aventura-matematica/
+(no celular, use "Adicionar à Tela de Início" para instalar como app; funciona sem internet)
+
+**Apps de celular para testar:** veja [docs/APPS.md](docs/APPS.md): `.apk` do Android e projeto do iPhone gerados a cada PR.
 
 ## O que tem
 - 5 regiões × 5 níveis: soma e subtração, sequências, comparação de números, formas geométricas e lógica
@@ -14,15 +17,16 @@ Jogo educativo de matemática e enigmas para crianças de 6 a 8 anos.
 ## Rodar localmente
 - **Jogar sem instalar nada:** baixe o arquivo único da versão (gerado por `npm run build` em `dist/`, ou em *Actions → Testes → Artifacts*) e abra com dois cliques.
 - **Desenvolver:** `python3 -m http.server` na pasta do projeto e abra http://localhost:8000
-- **Testes:** `npm test` (lógica), `python3 tests/e2e/smoke.py` e `python3 tests/e2e/account.py` (navegador)
+- **Testes:** `npm test` (lógica), `python3 tests/e2e/smoke.py`, `account.py` e `mobile.py` (navegador)
 
 Detalhes em [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
 
 ## Manual
-📘 [Manual do jogo (PDF) – v1.3](docs/Manual-Aventura-Matemagica-v1.3.pdf)
+📘 [Manual do jogo (PDF) – v1.4](docs/Manual-Aventura-Matemagica-v1.4.pdf)
 
 ## Versões
 Histórico completo em [CHANGELOG.md](CHANGELOG.md).
+- **1.4** – app instalável e sem internet, .apk do Android e projeto do iPhone, ícone novo.
 - **1.3** – Conta da família: progresso na nuvem, vários jogadores, funciona sem internet.
 - **1.2** – código organizado em módulos, testes automáticos e arquivo único com a versão no nome.
 - **1.1** – nome do jogador na abertura; número grande nas somas dos níveis 1 e 2; versão exibida nas Configurações; manual em PDF.
