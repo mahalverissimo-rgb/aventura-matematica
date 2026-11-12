@@ -1,0 +1,33 @@
+name: Testes
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Testes de lógica (desafios, progresso, build)
+        run: npm test
+      - name: Gerar arquivo único
+        run: npm run build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar navegador de teste
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Teste de ponta a ponta (jogar no navegador)
+        run: python tests/e2e/smoke.py
+      - name: Guardar o arquivo único gerado
+        uses: actions/upload-artifact@v4
+        with:
+          name: aventura-matematica-html
+          path: dist/*.html
