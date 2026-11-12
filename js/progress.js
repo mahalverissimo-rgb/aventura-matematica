@@ -16,6 +16,7 @@ export const defaultProgress = () => ({
   levelsDone: 0,
   tutorialSeen: false,
   name: "",
+  savedAt: 0,             // quando foi salvo pela última vez (para sincronizar)
   settings: { sound: true, voice: false, bigText: false, ads: true }
 });
 
@@ -32,25 +33,59 @@ function defaultStorage() {
   try { return globalThis.localStorage || null; } catch (e) { return null; }
 }
 
-/** Carrega o progresso salvo. Dados ausentes ou corrompidos viram o padrão. */
-export function loadProgress(storage = defaultStorage()) {
+/* ---------- onde salvar ---------- */
+
+// Sem conta: SAVE_KEY. Com conta: uma chave por perfil de criança (cópia local para jogar sem internet).
+let activeKey = SAVE_KEY;
+export const profileSaveKey = (profileId) => `${SAVE_KEY}:perfil:${profileId}`;
+export function setActiveSaveKey(key) { activeKey = key || SAVE_KEY; }
+export const activeSaveKey = () => activeKey;
+
+const saveListeners = [];
+/** Avisa quem precisa saber (ex.: sincronização com a nuvem) a cada salvamento. */
+export function onProgressSaved(fn) { saveListeners.push(fn); }
+
+/** Completa dados vindos de um save antigo ou da nuvem com os valores padrão. */
+export function normalizeProgress(d) {
   const base = defaultProgress();
-  try {
-    const raw = storage && storage.getItem(SAVE_KEY);
-    if (raw) {
-      const d = JSON.parse(raw);
-      if (d && typeof d === "object") {
-        replaceProgress(Object.assign(base, d, { settings: Object.assign(base.settings, d.settings || {}) }));
-        return P;
-      }
-    }
-  } catch (e) { /* save corrompido: começa do zero */ }
-  replaceProgress(base);
+  if (!d || typeof d !== "object") return base;
+  return Object.assign(base, d, {
+    stars: Object.assign({}, d.stars || {}),
+    owned: Array.isArray(d.owned) ? d.owned.slice() : base.owned,
+    settings: Object.assign(base.settings, d.settings || {})
+  });
+}
+
+/** Troca todo o progresso atual por outro (já normalizado). */
+export function applyProgress(d) {
+  replaceProgress(normalizeProgress(d));
   return P;
 }
 
-export function saveProgress(storage = defaultStorage()) {
-  try { if (storage) storage.setItem(SAVE_KEY, JSON.stringify(P)); } catch (e) { /* sem espaço / bloqueado */ }
+/** Lê um progresso salvo sem aplicá-lo. Devolve null se não existir ou estiver corrompido. */
+export function readSaved(storage = defaultStorage(), key = activeKey) {
+  try {
+    const raw = storage && storage.getItem(key);
+    if (!raw) return null;
+    const d = JSON.parse(raw);
+    return d && typeof d === "object" ? normalizeProgress(d) : null;
+  } catch (e) { return null; }
+}
+
+/** Carrega o progresso salvo. Dados ausentes ou corrompidos viram o padrão. */
+export function loadProgress(storage = defaultStorage(), key = activeKey) {
+  replaceProgress(readSaved(storage, key) || defaultProgress());
+  return P;
+}
+
+/**
+ * Salva o progresso. Por padrão marca a hora e avisa a sincronização;
+ * { silent: true } só grava (usado quando o dado veio da nuvem).
+ */
+export function saveProgress(storage = defaultStorage(), opts = {}) {
+  if (!opts.silent) P.savedAt = Date.now();
+  try { if (storage) storage.setItem(activeKey, JSON.stringify(P)); } catch (e) { /* sem espaço / bloqueado */ }
+  if (!opts.silent) saveListeners.forEach((fn) => { try { fn(P); } catch (e) { /* não derruba o jogo */ } });
 }
 
 /** Apaga o progresso, mantendo as configurações e pulando o tutorial. */

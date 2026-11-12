@@ -26,6 +26,8 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Teste de ponta a ponta (jogar no navegador)
         run: python tests/e2e/smoke.py
+      - name: Teste de ponta a ponta da Conta da família (Supabase simulado)
+        run: python tests/e2e/account.py
       - name: Guardar o arquivo único gerado
         uses: actions/upload-artifact@v4
         with:

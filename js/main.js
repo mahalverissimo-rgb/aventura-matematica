@@ -8,6 +8,7 @@ import { nav, go, showScreen, refresh, drawStarsBackground } from "./ui.js";
 import { askName, tutorial, bindSettings } from "./screens.js";
 import { play, startLevel, giveHint, pauseGame, speakCurrentQuestion } from "./game.js";
 import { rewardedAd } from "./ads.js";
+import { initAccount, afterStart, openAccount, chooserPanel, account } from "./account.js";
 
 function startPlaying() {
   if (!P.tutorialSeen) tutorial(); else go("map");
@@ -23,6 +24,8 @@ function bindEvents() {
   $("#btn-speak").onclick = speakCurrentQuestion;
   $("#g-mascot").onclick = giveHint;
   $("#btn-reward").onclick = () => { sfx.tap(); rewardedAd(); };
+  $("#btn-account").onclick = () => { sfx.tap(); openAccount(); };
+  $("#btn-switch").onclick = () => { sfx.tap(); chooserPanel(); };
   $$("[data-go]").forEach((b) => (b.onclick = () => {
     sfx.tap();
     const t = b.dataset.go;
@@ -35,8 +38,10 @@ function bindEvents() {
 
 drawStarsBackground();
 bindEvents();
+const start = initAccount();
 loadProgress();
 refresh();
+afterStart(start);
 
 // Acesso para os testes automatizados (tests/e2e).
-window.__AM = { VERSION, GEN, REGIONS, P: () => P, G: () => play.G, startLevel };
+window.__AM = { VERSION, GEN, REGIONS, P: () => P, G: () => play.G, startLevel, account };

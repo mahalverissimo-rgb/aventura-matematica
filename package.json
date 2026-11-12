@@ -1,6 +1,6 @@
 {
   "name": "aventura-matematica",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Aventura Matemágica – jogo educativo de matemática para crianças de 6 a 8 anos",
   "private": true,
   "type": "module",
