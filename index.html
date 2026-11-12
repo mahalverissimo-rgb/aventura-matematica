@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Aventura Matemágica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky1:#2b1b5a; --sky2:#5b2a86; --gold:#ffcf3f; --gold2:#ffb000;
+    --ink:#2a2140; --paper:#fff8ec; --ok:#3fbf6b; --bad:#ff5d73; --mint:#5fe0c8;
+    --card:#ffffff; --shadow:0 6px 0 rgba(0,0,0,.18);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+  html,body{margin:0;height:100%;font-family:"Baloo 2",system-ui,"Segoe UI",Roboto,sans-serif;color:var(--ink)}
+  body{background:radial-gradient(ellipse at top,var(--sky2),var(--sky1) 70%);overflow:hidden}
+  #stars-bg{position:fixed;inset:0;pointer-events:none;z-index:0}
+  #stars-bg i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;opacity:.6;animation:twinkle 3s infinite ease-in-out}
+  @keyframes twinkle{50%{opacity:.1}}
+  #app{position:relative;z-index:1;max-width:520px;margin:0 auto;height:100%;display:flex;flex-direction:column}
+  .screen{display:none;flex:1;flex-direction:column;padding:14px 16px 10px;min-height:0;animation:pop .25s ease-out}
+  .screen.active{display:flex}
+  @keyframes pop{from{transform:scale(.97);opacity:0}to{transform:none;opacity:1}}
+  button{font-family:inherit;border:none;cursor:pointer;color:var(--ink)}
+  .btn{background:var(--gold);border-radius:22px;padding:14px 22px;font-size:22px;font-weight:800;box-shadow:var(--shadow);transition:transform .08s}
+  .btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.18)}
+  .btn.big{font-size:34px;padding:18px 50px;border-radius:30px}
+  .btn.ghost{background:rgba(255,255,255,.92)}
+  .btn.mint{background:var(--mint)}
+  .btn.small{font-size:17px;padding:8px 14px;border-radius:16px}
+  .btn:disabled{opacity:.45}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+  .pill{background:rgba(255,255,255,.95);border-radius:18px;padding:6px 12px;font-weight:800;font-size:18px;box-shadow:var(--shadow);white-space:nowrap}
+  h1,h2{margin:0;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.25)}
+  .title-logo{text-align:center;margin-top:5vh}
+  .title-logo .wand{font-size:74px;display:inline-block;animation:float 2.4s ease-in-out infinite}
+  @keyframes float{50%{transform:translateY(-10px) rotate(-6deg)}}
+  .title-logo h1{font-size:46px;line-height:1;margin-top:6px}
+  .title-logo h1 span{color:var(--gold)}
+  .title-logo p{color:#e8dcff;font-size:19px;margin:8px 0 0}
+  .center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;flex:1}
+  .row{display:flex;gap:10px;justify-content:space-between;align-items:center}
+  .ad-banner{margin-top:8px;height:52px;border-radius:12px;border:2px dashed rgba(255,255,255,.5);color:rgba(255,255,255,.75);
+    display:flex;align-items:center;justify-content:center;font-size:14px;text-align:center;padding:0 10px}
+  .ad-banner.hidden{display:none}
+  /* mapa */
+  .map{flex:1;overflow-y:auto;padding:4px 2px 10px;display:flex;flex-direction:column;gap:12px}
+  .region{border-radius:24px;padding:14px 16px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow);text-align:left;width:100%}
+  .region .ico{font-size:48px;line-height:1}
+  .region .name{font-size:23px;font-weight:800;line-height:1.05}
+  .region .sub{font-size:15px;opacity:.8}
+  .region .prog{margin-left:auto;font-weight:800;font-size:17px;white-space:nowrap}
+  .region.locked{filter:grayscale(1);opacity:.6}
+  .avatar-line{color:#fff;display:flex;align-items:center;gap:10px;font-size:17px;margin-bottom:4px}
+  .avatar{font-size:42px;position:relative;display:inline-block;min-width:56px;text-align:center;white-space:nowrap}
+  .avatar .hat{position:absolute;left:50%;top:-24px;transform:translateX(-50%);font-size:30px}
+  /* níveis */
+  .levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:14px;margin-top:10px}
+  .lvl{background:var(--paper);border-radius:20px;padding:14px 6px;box-shadow:var(--shadow);font-size:34px;font-weight:800;display:flex;flex-direction:column;align-items:center}
+  .lvl .st{font-size:20px;letter-spacing:2px;color:var(--gold2)}
+  .lvl.locked{opacity:.5}
+  .story{background:rgba(255,255,255,.95);border-radius:20px;padding:12px 14px;font-size:18px;display:flex;gap:10px;align-items:flex-start;box-shadow:var(--shadow)}
+  .story .who{font-size:40px;line-height:1}
+  /* jogo */
+  .hud{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .lives{font-size:24px;letter-spacing:2px}
+  .progress{height:14px;background:rgba(255,255,255,.25);border-radius:10px;overflow:hidden;margin:8px 0}
+  .progress b{display:block;height:100%;background:linear-gradient(90deg,var(--mint),var(--gold));width:0;transition:width .3s}
+  .qcard{background:var(--paper);border-radius:28px;padding:16px 14px;box-shadow:var(--shadow);text-align:center;flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;min-height:0}
+  .qtext{font-size:25px;font-weight:700;line-height:1.15}
+  .qvisual{font-size:44px;line-height:1.2;font-weight:800;word-break:break-word}
+  .qvisual.eq{font-size:58px}
+  .qvisual .grp{display:inline-block;max-width:46%;vertical-align:middle;font-size:30px;line-height:1.15}
+  .qvisual .op{display:inline-block;vertical-align:middle;margin:0 6px;font-size:44px}
+  .qvisual svg{vertical-align:middle}
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  .opt{background:#fff;border-radius:22px;min-height:84px;font-size:38px;font-weight:800;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;padding:6px;transition:transform .1s}
+  .opt:active{transform:translateY(3px)}
+  .opt.right{background:var(--ok);color:#fff;animation:bounce .4s}
+  .opt.wrong{background:var(--bad);color:#fff;animation:shake .35s}
+  .opt.gone{opacity:.25;pointer-events:none}
+  @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  @keyframes bounce{50%{transform:scale(1.08)}}
+  .mascot-bar{display:flex;align-items:center;gap:8px;margin-top:10px}
+  .mascot{font-size:44px;line-height:1;cursor:pointer}
+  .bubble{background:#fff;border-radius:16px;padding:8px 12px;font-size:17px;flex:1;position:relative;min-height:44px;display:flex;align-items:center;box-shadow:var(--shadow)}
+  .bubble:before{content:"";position:absolute;left:-8px;top:50%;margin-top:-8px;border:8px solid transparent;border-right-color:#fff;border-left:0}
+  /* overlay */
+  .overlay{position:fixed;inset:0;background:rgba(20,10,40,.72);z-index:20;display:none;align-items:center;justify-content:center;padding:18px}
+  .overlay.active{display:flex}
+  .panel{background:var(--paper);border-radius:28px;padding:22px 20px;max-width:420px;width:100%;text-align:center;box-shadow:0 10px 0 rgba(0,0,0,.25);animation:pop .25s;max-height:92vh;overflow-y:auto}
+  .panel h2{color:var(--ink);text-shadow:none;font-size:32px}
+  .panel p{font-size:18px;margin:8px 0}
+  .bigstars{font-size:58px;letter-spacing:6px;margin:6px 0}
+  .bigstars span{display:inline-block;opacity:.2;transform:scale(.5);transition:all .35s cubic-bezier(.3,1.6,.6,1)}
+  .bigstars span.on{opacity:1;transform:scale(1)}
+  .btncol{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+  .shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;overflow-y:auto;padding-bottom:6px}
+  .item{background:var(--paper);border-radius:20px;padding:12px 8px;text-align:center;box-shadow:var(--shadow)}
+  .item .e{font-size:44px}
+  .item .n{font-weight:800;font-size:17px}
+  .item.eq{outline:4px solid var(--mint)}
+  .set-row{display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:16px;padding:10px 14px;margin:8px 0;font-size:19px;font-weight:700;text-align:left}
+  .toggle{width:64px;height:36px;border-radius:20px;background:#ccc;position:relative;flex:none}
+  .toggle:after{content:"";position:absolute;top:4px;left:4px;width:28px;height:28px;border-radius:50%;background:#fff;transition:left .2s}
+  .toggle.on{background:var(--ok)}
+  .toggle.on:after{left:32px}
+  .parent-note{font-size:15px;text-align:left;background:#fff;border-radius:14px;padding:10px 12px;line-height:1.35}
+  .confetti{position:fixed;top:-20px;font-size:24px;z-index:30;pointer-events:none;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+  .countdown{font-size:64px;font-weight:800}
+  .fakead{background:linear-gradient(135deg,#ffe5f1,#e0f2ff);border-radius:18px;padding:22px 10px;margin:10px 0;font-size:18px}
+  .sr{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<div id="stars-bg"></div>
+<div id="app">
+
+  <!-- TELA INICIAL -->
+  <section class="screen active" id="s-home">
+    <div class="title-logo">
+      <div class="wand">🪄</div>
+      <h1>Aventura<br><span>Matemágica</span></h1>
+      <p>Salve o reino com feitiços de matemática!</p>
+    </div>
+    <div class="center">
+      <div class="avatar-line" style="justify-content:center"><span class="avatar" id="home-avatar"></span><span id="home-rank"></span></div>
+      <button class="btn big" id="btn-play">▶ Jogar</button>
+    </div>
+    <div class="row">
+      <button class="btn ghost" id="btn-shop-home">🛍️ Loja</button>
+      <span class="pill" id="home-coins">🪙 0</span>
+      <button class="btn ghost" id="btn-settings-home">⚙️</button>
+    </div>
+    <div class="ad-banner" data-banner>Espaço do banner de anúncio (modo teste)</div>
+  </section>
+
+  <!-- MAPA -->
+  <section class="screen" id="s-map">
+    <div class="topbar">
+      <button class="btn ghost small" data-go="home">⬅ Voltar</button>
+      <span class="pill" data-coins>🪙 0</span>
+      <span class="pill" data-starsum>⭐ 0</span>
+      <button class="btn ghost small" id="btn-help">❓</button>
+    </div>
+    <div class="avatar-line"><span class="avatar" id="map-avatar"></span><span>Escolha uma região do Reino Mágico</span></div>
+    <div class="map" id="map"></div>
+    <div class="ad-banner" data-banner>Espaço do banner de anúncio (modo teste)</div>
+  </section>
+
+  <!-- NÍVEIS -->
+  <section class="screen" id="s-levels">
+    <div class="topbar">
+      <button class="btn ghost small" data-go="map">⬅ Mapa</button>
+      <span class="pill" data-coins>🪙 0</span>
+    </div>
+    <h2 id="lv-title" style="font-size:30px"></h2>
+    <div class="story" style="margin-top:8px"><span class="who">🧙‍♂️</span><span id="lv-story"></span></div>
+    <div class="levels" id="levels"></div>
+    <div style="flex:1"></div>
+    <div class="ad-banner" data-banner>Espaço do banner de anúncio (modo teste)</div>
+  </section>
+
+  <!-- JOGO -->
+  <section class="screen" id="s-game">
+    <div class="hud">
+      <button class="btn ghost small" id="btn-pause">⏸</button>
+      <span class="pill" id="g-label"></span>
+      <span class="pill lives" id="g-lives"></span>
+    </div>
+    <div class="progress"><b id="g-prog"></b></div>
+    <div class="qcard">
+      <div class="qtext" id="g-text"></div>
+      <div class="qvisual" id="g-visual"></div>
+      <div><button class="btn ghost small" id="btn-speak">🔊 Ouvir</button></div>
+    </div>
+    <div class="options" id="g-options"></div>
+    <div class="mascot-bar">
+      <span class="mascot" id="g-mascot" title="Pedir dica">🦉</span>
+      <div class="bubble" id="g-bubble">Toque em mim se precisar de uma dica!</div>
+    </div>
+  </section>
+
+  <!-- LOJA -->
+  <section class="screen" id="s-shop">
+    <div class="topbar">
+      <button class="btn ghost small" data-go="back">⬅ Voltar</button>
+      <h2 style="font-size:28px">🛍️ Loja Mágica</h2>
+      <span class="pill" data-coins>🪙 0</span>
+    </div>
+    <div class="avatar-line" style="justify-content:center;margin:20px 0 10px"><span class="avatar" id="shop-avatar" style="font-size:64px;width:90px"></span></div>
+    <div class="shop-grid" id="shop"></div>
+    <button class="btn mint" id="btn-reward" style="margin-top:10px">🎬 Ver vídeo e ganhar +20 🪙</button>
+    <div class="ad-banner" data-banner>Espaço do banner de anúncio (modo teste)</div>
+  </section>
+
+  <!-- CONFIGURAÇÕES -->
+  <section class="screen" id="s-settings">
+    <div class="topbar">
+      <button class="btn ghost small" data-go="back">⬅ Voltar</button>
+      <h2 style="font-size:28px">⚙️ Configurações</h2>
+      <span></span>
+    </div>
+    <div style="overflow-y:auto;flex:1">
+      <div class="set-row">🎵 Sons <span class="toggle" data-set="sound"></span></div>
+      <div class="set-row">🔊 Ler perguntas em voz alta <span class="toggle" data-set="voice"></span></div>
+      <div class="set-row">🔠 Letras maiores <span class="toggle" data-set="bigText"></span></div>
+      <div class="set-row">📺 Anúncios (área dos pais) <span class="toggle" data-set="ads" data-parent="1"></span></div>
+      <h2 style="font-size:22px;margin:16px 0 6px">👨‍👩‍👧 Para os pais</h2>
+      <div class="parent-note">
+        Jogo educativo para crianças de 6 a 8 anos: adição e subtração até 20, sequências, comparação de números, formas geométricas e raciocínio lógico.<br><br>
+        O progresso fica salvo só neste aparelho. Nenhum dado pessoal é coletado.<br><br>
+        Os anúncios desta versão são <b>apenas simulações</b> (nada real é exibido). Banners só aparecem nos menus, nunca durante o jogo.
+      </div>
+      <button class="btn ghost" id="btn-reset" style="margin-top:14px;width:100%">🗑️ Apagar progresso</button>
+    </div>
+  </section>
+</div>
+
+<!-- OVERLAYS -->
+<div class="overlay" id="ov"><div class="panel" id="ov-panel"></div></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- utilidades ---------- */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const rnd = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const shuffle = arr => { const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const rep = (e,n) => Array(n).fill(e).join("");
+
+// fundo de estrelas
+(function(){ const bg=$("#stars-bg"); for(let i=0;i<40;i++){const s=document.createElement("i");s.style.left=Math.random()*100+"%";s.style.top=Math.random()*100+"%";s.style.animationDelay=(Math.random()*3)+"s";bg.appendChild(s);} })();
+
+/* ---------- salvamento ---------- */
+const SAVE_KEY = "aventura-matemagica-v1";
+const defaults = () => ({ coins:0, stars:{}, owned:["none","owl"], hat:"none", pet:"owl", hero:"🧒",
+  levelsDone:0, tutorialSeen:false, settings:{sound:true, voice:false, bigText:false, ads:true} });
+let P = defaults();
+function load(){ try{ const raw=localStorage.getItem(SAVE_KEY); if(raw){ const d=JSON.parse(raw); P=Object.assign(defaults(),d); P.settings=Object.assign(defaults().settings,d.settings||{});} }catch(e){} }
+function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(P)); }catch(e){} }
+
+/* ---------- som ---------- */
+let actx=null;
+function tone(freqs, dur=0.12, type="sine", gap=0.09){
+  if(!P.settings.sound) return;
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    freqs.forEach((f,i)=>{ const o=actx.createOscillator(), g=actx.createGain(); o.type=type; o.frequency.value=f;
+      const t=actx.currentTime+i*gap; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.25,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+dur+0.02); });
+  }catch(e){}
+}
+const sfx = { tap:()=>tone([660],.06,"triangle"), ok:()=>tone([523,659,784],.16,"triangle"), bad:()=>tone([220,180],.18,"sawtooth",.12),
+  win:()=>tone([523,659,784,1047,1319],.2,"triangle",.11), coin:()=>tone([988,1319],.1,"square",.07) };
+
+function speak(text){
+  try{ if(!window.speechSynthesis) return; speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text.replace(/[^\p{L}\p{N}\s?.,!+\-=]/gu," ").replace(/\+/g," mais ").replace(/-/g," menos ").replace(/=/g," é igual a ").replace(/\?/g," quanto? "));
+    u.lang="pt-BR"; u.rate=0.9; speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ---------- formas (SVG) ---------- */
+const SHAPES = {
+  circulo:{nome:"círculo", lados:0, svg:'<circle cx="50" cy="50" r="40"/>'},
+  quadrado:{nome:"quadrado", lados:4, svg:'<rect x="12" y="12" width="76" height="76" rx="4"/>'},
+  triangulo:{nome:"triângulo", lados:3, svg:'<polygon points="50,8 92,88 8,88"/>'},
+  retangulo:{nome:"retângulo", lados:4, svg:'<rect x="4" y="25" width="92" height="50" rx="4"/>'},
+  pentagono:{nome:"pentágono", lados:5, svg:'<polygon points="50,6 94,38 77,90 23,90 6,38"/>'},
+  hexagono:{nome:"hexágono", lados:6, svg:'<polygon points="27,8 73,8 96,50 73,92 27,92 4,50"/>'},
+  estrela:{nome:"estrela", lados:10, svg:'<polygon points="50,4 61,38 97,38 68,59 79,94 50,72 21,94 32,59 3,38 39,38"/>'}
+};
+const COLORS=["#ff6b8a","#4cc3ff","#ffc93c","#7ed957","#b67cff","#ff9f43"];
+function shapeSVG(key,size=70,color){ color=color||pick(COLORS);
+  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" aria-label="${SHAPES[key].nome}"><g fill="${color}" stroke="#2a2140" stroke-width="4" stroke-linejoin="round">${SHAPES[key].svg}</g></svg>`; }
+
+/* ---------- geradores de desafios ---------- */
+const OBJ = ["🍎","⭐","🍄","💎","🧪","🐸","🌸","🔮"];
+function numOptions(correct, n=4, min=0, spread=3){
+  const s=new Set([correct]); let guard=0;
+  while(s.size<n && guard++<200){ const v=correct+rnd(-spread,spread); if(v>=min && v!==correct) s.add(v); }
+  let k=correct+spread+1; while(s.size<n) s.add(k++);
+  return shuffle([...s]).map(v=>({label:String(v), value:v}));
+}
+function Q(text, visual, options, answer, hint, opts={}){ return Object.assign({text, visual, options, answer, hint}, opts); }
+
+const GEN = [
+  // 0 Floresta da Soma — adição e subtração
+  function(l){
+    const max = Math.min(6 + l*3, 20);
+    const sub = l>=3 && Math.random()<0.5;
+    if(!sub){
+      let a=rnd(1,max-1), b=rnd(1,max-a);
+      if(l<=2){ const o=pick(OBJ);
+        return Q("Quantos tem ao todo?", `<span class="grp">${rep(o,a)}</span><span class="op">+</span><span class="grp">${rep(o,b)}</span>`,
+          numOptions(a+b,4,1), a+b, `Conte tudo junto: ${a} e mais ${b}.`, {speech:`${a} mais ${b}`}); }
+      return Q("Lance o feitiço da soma!", `${a} + ${b} = ?`, numOptions(a+b,4,1), a+b, `Comece no ${Math.max(a,b)} e conte mais ${Math.min(a,b)} nos dedos.`, {eq:true});
+    }
+    let a=rnd(3,max), b=rnd(1,a-1);
+    return Q("Feitiço da subtração!", `${a} − ${b} = ?`, numOptions(a-b,4,0), a-b, `Tinha ${a}, tira ${b}. Conte para trás a partir do ${a}.`, {eq:true, speech:`${a} menos ${b}`});
+  },
+  // 1 Torre das Sequências
+  function(l){
+    if(l<=2 && Math.random()<0.6){
+      const pats=[[0,1],[0,1,2],[0,0,1],[0,1,1]];
+      const p=pick(l===1?pats.slice(0,1).concat([[0,1]]):pats);
+      const sym=shuffle(["🔴","🔵","🟡","🟢","⭐","🌙","🍄","💎"]).slice(0,3);
+      const seq=[]; for(let i=0;i<7;i++) seq.push(sym[p[i%p.length]]);
+      const ans=seq[6];
+      const opts=shuffle([...new Set([ans,...sym.slice(0,Math.max(2,new Set(p).size)), sym[2]])]).slice(0,3);
+      if(!opts.includes(ans)) opts[0]=ans;
+      return Q("O que vem depois no padrão mágico?", seq.slice(0,6).join(" ")+" ❓", shuffle(opts).map(v=>({label:v,value:v})), ans, "Olhe como as figuras se repetem.");
+    }
+    const steps = l<=2?[1,2]: l===3?[2,5]: [2,5,10,3];
+    const step=pick(steps); const down = l>=4 && Math.random()<0.4;
+    let start = down ? rnd(step*5, step*5+10) : rnd(0, l<=2?5:10);
+    const seq=[]; for(let i=0;i<5;i++) seq.push(start + (down?-1:1)*step*i);
+    const hole = l>=5 && Math.random()<0.5 ? rnd(1,3) : 4;
+    const ans=seq[hole]; const shown=seq.map((v,i)=>i===hole?"❓":v).join(", ");
+    return Q("Complete a sequência para abrir o portal!", shown, numOptions(ans,4,0,Math.max(2,step)), ans,
+      `Os números ${down?"diminuem":"aumentam"} de ${step} em ${step}.`, {speech:shown.replace("❓","qual número")});
+  },
+  // 2 Lago dos Números — comparação, contagem, número escondido
+  function(l){
+    const kinds = l===1?["maior","contar"]: l===2?["menor","maior","contar"]: l===3?["falta","maior3"]: l===4?["falta","contar","menor3"]:["falta","faltasub","maior3"];
+    const k=pick(kinds);
+    if(k==="maior"||k==="menor"){ let a=rnd(1,10), b; do{b=rnd(1,10)}while(b===a);
+      return Q(`Qual número é o ${k.toUpperCase()}?`, "🐟 ⚖️ 🐟", shuffle([a,b]).map(v=>({label:String(v),value:v})), k==="maior"?Math.max(a,b):Math.min(a,b), `O ${k} é o que fica ${k==="maior"?"mais longe":"mais perto"} do zero.`); }
+    if(k==="maior3"||k==="menor3"){ const s=new Set(); while(s.size<3) s.add(rnd(1,20)); const arr=[...s]; const big=k==="maior3";
+      return Q(`Toque no número ${big?"MAIOR":"MENOR"}!`, "🐟 🐠 🐡", shuffle(arr).map(v=>({label:String(v),value:v})), big?Math.max(...arr):Math.min(...arr), "Compare as dezenas primeiro, depois as unidades."); }
+    if(k==="contar"){ const n=rnd(3, l===1?8:14), o=pick(["🐟","🐠","🦆","🐚","🪷"]);
+      return Q("Quantos tem no lago?", `<span style="font-size:${n>9?32:40}px">${rep(o,n)}</span>`, numOptions(n,4,1,2), n, "Toque com o dedo em cada um enquanto conta."); }
+    if(k==="falta"){ const a=rnd(1,9), b=rnd(1,10);
+      return Q("Qual número está escondido?", `${a} + ❓ = ${a+b}`, numOptions(b,4,0), b, `Quanto falta do ${a} até o ${a+b}? Conte nos dedos.`, {eq:true, speech:`${a} mais qual número é igual a ${a+b}`}); }
+    const b=rnd(1,8), r=rnd(1,10);
+    return Q("Qual número está escondido?", `❓ − ${b} = ${r}`, numOptions(r+b,4,1), r+b, `Faça ao contrário: ${r} + ${b}.`, {eq:true, speech:`qual número menos ${b} é igual a ${r}`});
+  },
+  // 3 Vale das Formas
+  function(l){
+    const basic=["circulo","quadrado","triangulo","retangulo"], all=Object.keys(SHAPES).filter(k=>k!=="estrela");
+    const kinds = l<=2?["achar"]: l===3?["lados","achar"]: l===4?["contar","lados"]:["contar","lados","achar"];
+    const k=pick(kinds);
+    if(k==="achar"){ const pool=l===1?basic.slice(0,3):l===2?basic.concat(["estrela"]):Object.keys(SHAPES);
+      const opts=shuffle(pool).slice(0,l===1?3:4); const ans=pick(opts);
+      return Q(`Toque no ${SHAPES[ans].nome.toUpperCase()}!`, "✨", opts.map(s=>({label:shapeSVG(s,64),value:s})), ans,
+        ({circulo:"É redondinho, não tem pontas.",quadrado:"Tem 4 lados todos iguais.",triangulo:"Tem 3 lados e 3 pontas.",retangulo:"Tem 4 lados, dois compridos e dois curtos.",pentagono:"Tem 5 lados.",hexagono:"Tem 6 lados, como um favo de mel.",estrela:"Tem pontas como as do céu."})[ans],
+        {speech:`toque no ${SHAPES[ans].nome}`}); }
+    if(k==="lados"){ const s=pick(l===3?["triangulo","quadrado","retangulo"]:all.filter(x=>x!=="circulo"));
+      return Q(`Quantos lados tem o ${SHAPES[s].nome}?`, shapeSVG(s,130), numOptions(SHAPES[s].lados,4,3,2), SHAPES[s].lados, "Passe o dedo em cada lado e conte."); }
+    const target=pick(["triangulo","circulo","quadrado"]); const n=rnd(2,l===4?5:7); const others=rnd(2,4);
+    const items=shuffle(Array(n).fill(target).concat(Array.from({length:others},()=>pick(["circulo","quadrado","triangulo","estrela"].filter(x=>x!==target)))));
+    return Q(`Quantos ${SHAPES[target].nome}s você vê?`, items.map(s=>shapeSVG(s,46)).join(""), numOptions(n,4,1,2), n, `Procure só os ${SHAPES[target].nome}s e conte devagar.`);
+  },
+  // 4 Castelo dos Enigmas — lógica
+  function(l){
+    const groups=[["🍎","🍌","🍇","🍓","🍐"],["🐶","🐱","🐰","🐻","🐼"],["🚗","🚌","🚲","🚂","✈️"],["⚽","🏀","🎾","🏐"],["🌞","🌙","⭐","☁️"]];
+    const kinds = l<=2?["intruso"]: l<=4?["problema","intruso"]:["problema","entre","intruso","par"];
+    const k=pick(kinds);
+    if(k==="intruso"){ const [g1,g2]=shuffle(groups).slice(0,2); const same=shuffle(g1).slice(0,3); const odd=pick(g2);
+      return Q("Qual NÃO combina com os outros?", "🔍", shuffle(same.concat([odd])).map(v=>({label:v,value:v})), odd, "Três são da mesma família. Qual é diferente?"); }
+    if(k==="problema"){ const t=pick([
+        ()=>{const a=rnd(2,8),b=rnd(1,6);return [`O mago tem ${a} poções 🧪 e ganhou mais ${b}. Quantas poções ele tem agora?`,a+b,`Junte ${a} com ${b}.`]},
+        ()=>{const a=rnd(5,12),b=rnd(1,a-1);return [`Havia ${a} sapos 🐸 no lago. ${b} pularam para fora. Quantos ficaram?`,a-b,`Tire ${b} de ${a}.`]},
+        ()=>{const a=rnd(2,5);return [`Cada dragão 🐉 tem 2 asas. Quantas asas têm ${a} dragões?`,a*2,`Conte de 2 em 2, ${a} vezes.`]},
+        ()=>{const a=rnd(3,9),b=rnd(1,a-1);return [`Luna tem ${a} estrelas ⭐ e Teo tem ${b}. Quantas a mais Luna tem?`,a-b,`Quanto falta do ${b} até o ${a}?`]}
+      ])();
+      return Q(t[0], "🧙‍♂️", numOptions(t[1],4,0), t[1], t[2]); }
+    if(k==="entre"){ const a=rnd(1,18);
+      return Q("Qual número fica no meio?", `${a} , ❓ , ${a+2}`, numOptions(a+1,4,0,2), a+1, `Qual vem logo depois do ${a}?`, {eq:true}); }
+    const nums=shuffle([rnd(1,9)*2, rnd(0,9)*2+1, rnd(0,9)*2+1, rnd(0,9)*2+1]); const ans=nums.find(n=>n%2===0);
+    return Q("Qual número é PAR? (dá para dividir em 2 grupos iguais)", "👯", [...new Set(nums)].map(v=>({label:String(v),value:v})), ans, "Números pares terminam em 0, 2, 4, 6 ou 8.");
+  }
+];
+
+/* ---------- regiões ---------- */
+const REGIONS = [
+  {nome:"Floresta da Soma", ico:"🌳", cor:"#9be58a", sub:"Somar e subtrair",
+    story:"O vilão Bagunço embaralhou as frutas mágicas! Use soma e subtração para devolver tudo ao lugar."},
+  {nome:"Torre das Sequências", ico:"🗼", cor:"#8fd3ff", sub:"Padrões e sequências",
+    story:"Os portais da torre só abrem quando você completa os padrões mágicos."},
+  {nome:"Lago dos Números", ico:"🌊", cor:"#7fe6e0", sub:"Comparar e contar",
+    story:"Os peixinhos do lago perderam a conta! Ajude a descobrir números maiores, menores e escondidos."},
+  {nome:"Vale das Formas", ico:"🔷", cor:"#ffd27a", sub:"Formas geométricas",
+    story:"Para construir a ponte mágica precisamos encontrar as formas certas."},
+  {nome:"Castelo dos Enigmas", ico:"🏰", cor:"#f5a3d0", sub:"Lógica e enigmas",
+    story:"O Bagunço se escondeu no castelo! Resolva os enigmas para derrotá-lo e salvar o reino."}
+];
+const LEVELS_PER_REGION = 5, QUESTIONS_PER_LEVEL = 5, MAX_LIVES = 3;
+const lid = (r,l) => r*LEVELS_PER_REGION + l; // índice global (l começa em 0)
+const starsOf = (r,l) => P.stars[lid(r,l)]||0;
+const isUnlocked = (r,l) => lid(r,l)===0 || starsOf(...(l>0?[r,l-1]:[r-1,LEVELS_PER_REGION-1]))>0;
+const regionUnlocked = r => isUnlocked(r,0);
+const totalStars = () => Object.values(P.stars).reduce((a,b)=>a+b,0);
+const RANKS=["Aprendiz","Mago Iniciante","Mago Aventureiro","Mago Sábio","Grande Arquimago"];
+const rank = () => RANKS[Math.min(RANKS.length-1, Math.floor(totalStars()/15))];
+
+/* ---------- loja ---------- */
+const SHOP = [
+  {id:"none", tipo:"hat", e:"🧒", n:"Sem chapéu", p:0},
+  {id:"wizard", tipo:"hat", e:"🧙", n:"Chapéu de Mago", p:30},
+  {id:"crown", tipo:"hat", e:"👑", n:"Coroa", p:60},
+  {id:"tophat", tipo:"hat", e:"🎩", n:"Cartola", p:45},
+  {id:"bow", tipo:"hat", e:"🎀", n:"Laço Mágico", p:25},
+  {id:"owl", tipo:"pet", e:"🦉", n:"Corujito", p:0},
+  {id:"cat", tipo:"pet", e:"🐱", n:"Gato Estelar", p:40},
+  {id:"dragon", tipo:"pet", e:"🐲", n:"Dragãozinho", p:90},
+  {id:"unicorn", tipo:"pet", e:"🦄", n:"Unicórnio", p:120},
+  {id:"fox", tipo:"pet", e:"🦊", n:"Raposa Sabida", p:70}
+];
+const HAT_E = {none:"", wizard:"🧙‍♂️", crown:"👑", tophat:"🎩", bow:"🎀"};
+const petE = () => (SHOP.find(i=>i.id===P.pet)||SHOP[5]).e;
+const petName = () => (SHOP.find(i=>i.id===P.pet)||SHOP[5]).n;
+function avatarHTML(){ const h=P.hat==="wizard"?"🧙":(HAT_E[P.hat]||"");
+  return P.hat==="wizard" ? `🧙<span style="font-size:.6em">${petE()}</span>` : `${h?`<span class="hat">${h}</span>`:""}🧒<span style="font-size:.6em">${petE()}</span>`; }
+
+/* ---------- navegação ---------- */
+let current="home", previous="home";
+function go(name){ if(name==="back") name=previous; if(name!==current && ["home","map","levels"].includes(current)) previous=current;
+  $$(".screen").forEach(s=>s.classList.toggle("active", s.id==="s-"+name)); current=name; refresh(); }
+function refresh(){
+  $$("[data-coins]").forEach(e=>e.textContent="🪙 "+P.coins);
+  $$("[data-starsum]").forEach(e=>e.textContent="⭐ "+totalStars());
+  $("#home-coins").textContent="🪙 "+P.coins;
+  $$("[data-banner]").forEach(e=>e.classList.toggle("hidden", !P.settings.ads));
+  ["#home-avatar","#map-avatar","#shop-avatar"].forEach(s=>$(s).innerHTML=avatarHTML());
+  $("#home-rank").textContent=rank();
+  document.body.style.fontSize = P.settings.bigText?"112%":"";
+  $$(".qtext").forEach(e=>e.style.fontSize=P.settings.bigText?"30px":"");
+  if(current==="map") renderMap();
+  if(current==="levels") renderLevels();
+  if(current==="shop") renderShop();
+  if(current==="settings") $$("[data-set]").forEach(t=>t.classList.toggle("on", !!P.settings[t.dataset.set]));
+}
+
+/* ---------- mapa ---------- */
+function renderMap(){
+  const m=$("#map"); m.innerHTML="";
+  REGIONS.forEach((R,r)=>{
+    const un=regionUnlocked(r); let st=0; for(let l=0;l<LEVELS_PER_REGION;l++) st+=starsOf(r,l);
+    const b=document.createElement("button"); b.className="region"+(un?"":" locked"); b.style.background=R.cor;
+    b.innerHTML=`<span class="ico">${un?R.ico:"🔒"}</span><span><div class="name">${R.nome}</div><div class="sub">${R.sub}</div></span><span class="prog">⭐ ${st}/${LEVELS_PER_REGION*3}</span>`;
+    b.onclick=()=>{ sfx.tap(); if(!un){ toast("🔒 Termine a região anterior para abrir esta!"); return;} curRegion=r; go("levels"); };
+    m.appendChild(b);
+  });
+}
+let curRegion=0;
+function renderLevels(){
+  const R=REGIONS[curRegion]; $("#lv-title").textContent=R.ico+" "+R.nome; $("#lv-story").textContent=R.story;
+  const g=$("#levels"); g.innerHTML="";
+  for(let l=0;l<LEVELS_PER_REGION;l++){
+    const un=isUnlocked(curRegion,l), s=starsOf(curRegion,l);
+    const b=document.createElement("button"); b.className="lvl"+(un?"":" locked");
+    b.innerHTML=`<span>${un?"📜 "+(l+1):"🔒"}</span><span class="st">${"★".repeat(s)}${"☆".repeat(3-s)}</span>`;
+    b.onclick=()=>{ sfx.tap(); if(!un){ toast("Complete o nível anterior primeiro!"); return;} startLevel(curRegion,l); };
+    g.appendChild(b);
+  }
+}
+
+/* ---------- jogo ---------- */
+let G=null, hintTimer=null;
+function startLevel(r,l){
+  G={r,l,q:0,lives:MAX_LIVES,mistakes:0,current:null,locked:false,hintUsed:false};
+  go("game"); $("#g-label").textContent=`${REGIONS[r].ico} Nível ${l+1}`;
+  nextQuestion();
+}
+function nextQuestion(){
+  clearTimeout(hintTimer);
+  if(G.q>=QUESTIONS_PER_LEVEL) return winLevel();
+  const q=GEN[G.r](G.l+1); G.current=q; G.locked=false; G.wrongThisQ=0;
+  $("#g-prog").style.width=(G.q/QUESTIONS_PER_LEVEL*100)+"%";
+  $("#g-lives").textContent=rep("❤️",G.lives)+rep("🤍",MAX_LIVES-G.lives);
+  $("#g-text").textContent=q.text;
+  const v=$("#g-visual"); v.innerHTML=q.visual; v.className="qvisual"+(q.eq?" eq":"");
+  const o=$("#g-options"); o.innerHTML="";
+  o.style.gridTemplateColumns = q.options.length===3?"1fr 1fr 1fr":"1fr 1fr";
+  q.options.forEach(op=>{ const b=document.createElement("button"); b.className="opt"; b.innerHTML=op.label; b.dataset.v=op.value;
+    b.onclick=()=>answer(b,op.value); o.appendChild(b); });
+  $("#g-mascot").textContent=petE();
+  say(pick(["Você consegue! ✨","Pense com calma…","Vamos lá, mago!","Use sua magia matemática!"]));
+  hintTimer=setTimeout(()=>say("Precisa de ajuda? Toque em mim! 💡"),12000);
+  if(P.settings.voice) speak(q.text+". "+(q.speech||stripTags(q.visual)));
+}
+function stripTags(h){ const d=document.createElement("div"); d.innerHTML=h; return d.textContent.replace(/❓/g,"qual número").replace(/−/g,"-"); }
+function say(t){ $("#g-bubble").textContent=t; }
+function answer(btn,val){
+  if(G.locked) return;
+  const q=G.current;
+  if(String(val)===String(q.answer)){
+    G.locked=true; btn.classList.add("right"); sfx.ok(); burst(btn,6);
+    say(pick(["Isso! Feitiço perfeito! 🌟","Uau, mandou bem! 🎉","Magia certeira! ✨","Excelente! 🧙"]));
+    G.q++; setTimeout(nextQuestion,900);
+  } else {
+    btn.classList.add("wrong"); sfx.bad(); G.mistakes++; G.wrongThisQ++; G.lives--;
+    setTimeout(()=>{ btn.classList.remove("wrong"); btn.classList.add("gone"); },380);
+    $("#g-lives").textContent=rep("❤️",Math.max(0,G.lives))+rep("🤍",MAX_LIVES-Math.max(0,G.lives));
+    if(G.lives<=0){ G.locked=true; setTimeout(loseLevel,600); return; }
+    say("Quase! 💡 "+q.hint);
+  }
+}
+function giveHint(){
+  if(!G||current!=="game"||G.locked) return; sfx.tap();
+  say("💡 "+G.current.hint);
+  // remove uma alternativa errada
+  const wrong=$$("#g-options .opt:not(.gone)").filter(b=>String(b.dataset.v)!==String(G.current.answer));
+  if(wrong.length>1){ pick(wrong).classList.add("gone"); }
+  if(P.settings.voice) speak(G.current.hint);
+}
+function starsFor(m){ return m===0?3: m===1?2:1; }
+function winLevel(){
+  clearTimeout(hintTimer);
+  $("#g-prog").style.width="100%";
+  const stars=starsFor(G.mistakes), id=lid(G.r,G.l), old=P.stars[id]||0;
+  const firstTime = old===0;
+  const coins = 10 + stars*5 + (firstTime?10:0);
+  P.stars[id]=Math.max(old,stars); P.coins+=coins; P.levelsDone++; save();
+  sfx.win(); confetti();
+  const last = G.l===LEVELS_PER_REGION-1;
+  const hasNext = !(last && G.r===REGIONS.length-1);
+  const endGame = last && G.r===REGIONS.length-1 && firstTime;
+  const regionDone = last && firstTime && !endGame;
+  overlay(`
+    <h2>${endGame?"🏆 Você salvou o reino!":"Nível concluído!"}</h2>
+    <div class="bigstars"><span>⭐</span><span>⭐</span><span>⭐</span></div>
+    <p><b>+${coins} 🪙</b>${firstTime?" (inclui bônus de primeira vez!)":""}</p>
+    ${regionDone?`<p>🎉 Nova região desbloqueada: <b>${REGIONS[G.r+1].ico} ${REGIONS[G.r+1].nome}</b>!</p>`:""}
+    ${endGame?`<p>O Bagunço foi derrotado e o Reino Mágico voltou a ficar em ordem. Você é um verdadeiro Mago da Matemática! 🧙‍♂️✨</p>`:""}
+    <p style="font-size:16px">${stars<3?"Dica: jogue de novo sem errar para ganhar 3 estrelas!":"Perfeito, nenhum erro!"}</p>
+    <div class="btncol">
+      ${hasNext?`<button class="btn" id="ov-next">Próximo ▶</button>`:""}
+      <div class="row"><button class="btn ghost" id="ov-retry" style="flex:1">🔁 Repetir</button><button class="btn ghost" id="ov-map" style="flex:1">🗺️ Mapa</button></div>
+    </div>`);
+  $$("#ov .bigstars span").forEach((s,i)=>setTimeout(()=>{ if(i<stars){s.classList.add("on"); sfx.coin();} },350+i*350));
+  const after = fn => () => { closeOverlay(); maybeInterstitial(fn); };
+  if(hasNext) $("#ov-next").onclick=after(()=>{ const nl=last?0:G.l+1, nr=last?G.r+1:G.r; curRegion=nr; startLevel(nr,nl); });
+  $("#ov-retry").onclick=after(()=>startLevel(G.r,G.l));
+  $("#ov-map").onclick=after(()=>go("map"));
+}
+function loseLevel(){
+  overlay(`<h2>Ops! Acabaram os corações 💔</h2>
+    <p style="font-size:48px">${petE()}</p>
+    <p>Tudo bem errar, é assim que a gente aprende! Vamos tentar de novo?</p>
+    <div class="btncol"><button class="btn" id="ov-retry">🔁 Tentar de novo</button><button class="btn ghost" id="ov-map">🗺️ Mapa</button></div>`);
+  $("#ov-retry").onclick=()=>{ closeOverlay(); startLevel(G.r,G.l); };
+  $("#ov-map").onclick=()=>{ closeOverlay(); go("levels"); };
+}
+function pauseGame(){
+  clearTimeout(hintTimer);
+  overlay(`<h2>⏸ Pausa</h2><p>${pick(["Sabia? Somar é juntar, subtrair é tirar!","Um triângulo sempre tem 3 lados.","Números pares terminam em 0, 2, 4, 6 ou 8.","Contar nos dedos é um ótimo truque!"])}</p>
+    <div class="btncol"><button class="btn" id="ov-cont">▶ Continuar</button><button class="btn ghost" id="ov-retry">🔁 Reiniciar nível</button>
+    <button class="btn ghost" id="ov-quit">🚪 Sair do nível</button><button class="btn ghost" id="ov-set">⚙️ Configurações</button></div>`);
+  $("#ov-cont").onclick=()=>closeOverlay();
+  $("#ov-retry").onclick=()=>{ closeOverlay(); startLevel(G.r,G.l); };
+  $("#ov-quit").onclick=()=>{ closeOverlay(); go("levels"); };
+  $("#ov-set").onclick=()=>{ closeOverlay(); previous="game"; $$(".screen").forEach(s=>s.classList.toggle("active", s.id==="s-settings")); current="settings"; refresh(); };
+}
+
+/* ---------- anúncios simulados ---------- */
+// Vídeo entre fases a cada 3 níveis concluídos (conforme o documento técnico)
+function maybeInterstitial(then){
+  if(!P.settings.ads || P.levelsDone%3!==0){ then(); return; }
+  let t=5;
+  overlay(`<p style="font-size:15px;opacity:.7">ANÚNCIO DE TESTE · entre fases</p>
+    <div class="fakead">📺<br>Aqui apareceria um vídeo curto<br>apropriado para crianças.</div>
+    <div class="countdown" id="cd">${t}</div>
+    <button class="btn ghost" id="ov-skip">Pular ⏭</button>`);
+  const iv=setInterval(()=>{ t--; const c=$("#cd"); if(c) c.textContent=t; if(t<=0){ clearInterval(iv); closeOverlay(); then(); } },1000);
+  $("#ov-skip").onclick=()=>{ clearInterval(iv); closeOverlay(); then(); };
+}
+function rewardedAd(){
+  if(!P.settings.ads){ toast("Os anúncios estão desligados na área dos pais."); return; }
+  let t=5;
+  overlay(`<p style="font-size:15px;opacity:.7">VÍDEO RECOMPENSADO DE TESTE</p>
+    <div class="fakead">🎬<br>Assista até o fim para ganhar moedas!</div>
+    <div class="countdown" id="cd">${t}</div><button class="btn ghost" id="ov-skip">Desistir</button>`);
+  const iv=setInterval(()=>{ t--; const c=$("#cd"); if(c) c.textContent=t;
+    if(t<=0){ clearInterval(iv); P.coins+=20; save(); sfx.coin(); closeOverlay(); toast("+20 🪙 ganhas!"); refresh(); } },1000);
+  $("#ov-skip").onclick=()=>{ clearInterval(iv); closeOverlay(); };
+}
+
+/* ---------- loja ---------- */
+function renderShop(){
+  const g=$("#shop"); g.innerHTML="";
+  SHOP.forEach(it=>{
+    const own=P.owned.includes(it.id), eq=(it.tipo==="hat"?P.hat:P.pet)===it.id;
+    const d=document.createElement("div"); d.className="item"+(eq?" eq":"");
+    d.innerHTML=`<div class="e">${it.tipo==="hat"&&it.id!=="none"?(HAT_E[it.id]||it.e):it.e}</div><div class="n">${it.n}</div>
+      <div style="font-size:13px;opacity:.7">${it.tipo==="hat"?"Visual":"Mascote ajudante"}</div>`;
+    const b=document.createElement("button"); b.className="btn small"+(own?" ghost":"");
+    b.textContent = eq?"✔ Usando": own?"Usar": `🪙 ${it.p}`;
+    b.disabled = eq;
+    b.onclick=()=>{
+      if(!own){ if(P.coins<it.p){ sfx.bad(); toast(`Faltam ${it.p-P.coins} 🪙. Jogue mais níveis!`); return; }
+        P.coins-=it.p; P.owned.push(it.id); sfx.coin(); confetti(12); toast("Novo item! 🎉"); }
+      else sfx.tap();
+      if(it.tipo==="hat") P.hat=it.id; else P.pet=it.id;
+      save(); refresh();
+    };
+    d.appendChild(b); g.appendChild(d);
+  });
+}
+
+/* ---------- configurações ---------- */
+function parentGate(then){
+  const a=rnd(11,19), b=rnd(11,19);
+  overlay(`<h2>👨‍👩‍👧 Área dos pais</h2><p>Para continuar, um adulto deve responder:</p><p style="font-size:30px;font-weight:800">${a} × ${b} = ?</p>
+    <input id="pg" inputmode="numeric" style="font:inherit;font-size:26px;width:140px;text-align:center;border-radius:14px;border:2px solid #ccc;padding:6px">
+    <div class="btncol"><button class="btn" id="pg-ok">Confirmar</button><button class="btn ghost" id="pg-no">Cancelar</button></div>`);
+  $("#pg-ok").onclick=()=>{ if(parseInt($("#pg").value,10)===a*b){ closeOverlay(); then(); } else { sfx.bad(); toast("Resposta incorreta."); } };
+  $("#pg-no").onclick=closeOverlay;
+}
+$$("[data-set]").forEach(t=>t.onclick=()=>{
+  const k=t.dataset.set; const apply=()=>{ P.settings[k]=!P.settings[k]; save(); sfx.tap(); refresh(); };
+  if(t.dataset.parent) parentGate(apply); else apply();
+});
+$("#btn-reset").onclick=()=>parentGate(()=>{ const s=P.settings; P=defaults(); P.settings=s; P.tutorialSeen=true; save(); toast("Progresso apagado."); refresh(); });
+
+/* ---------- overlay / efeitos ---------- */
+function overlay(html){ $("#ov-panel").innerHTML=html; $("#ov").classList.add("active"); }
+function closeOverlay(){ $("#ov").classList.remove("active"); }
+let toastT;
+function toast(msg){ let t=$("#toast"); if(!t){ t=document.createElement("div"); t.id="toast";
+  t.style.cssText="position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#fff;color:#2a2140;padding:10px 18px;border-radius:18px;font-weight:800;font-size:18px;z-index:40;box-shadow:0 6px 0 rgba(0,0,0,.2);text-align:center;max-width:90%;transition:opacity .3s;pointer-events:none";
+  document.body.appendChild(t);} t.textContent=msg; t.style.opacity=1; clearTimeout(toastT); toastT=setTimeout(()=>t.style.opacity=0,2200); }
+function confetti(n=40){ for(let i=0;i<n;i++){ const c=document.createElement("div"); c.className="confetti"; c.textContent=pick(["✨","⭐","🌟","🎉","💫","🪙"]);
+  c.style.left=Math.random()*100+"vw"; c.style.animationDuration=(1.6+Math.random()*1.6)+"s"; c.style.animationDelay=(Math.random()*.5)+"s";
+  document.body.appendChild(c); setTimeout(()=>c.remove(),3800);} }
+function burst(el,n){ const r=el.getBoundingClientRect(); for(let i=0;i<n;i++){ const c=document.createElement("div"); c.textContent="✨";
+  c.style.cssText=`position:fixed;left:${r.left+r.width/2}px;top:${r.top+r.height/2}px;font-size:22px;z-index:30;pointer-events:none;transition:all .7s ease-out`;
+  document.body.appendChild(c); requestAnimationFrame(()=>{ c.style.transform=`translate(${rnd(-80,80)}px,${rnd(-90,10)}px)`; c.style.opacity=0; }); setTimeout(()=>c.remove(),800);} }
+
+/* ---------- tutorial ---------- */
+function tutorial(){
+  const steps=[
+    ["🧙‍♂️","Olá, jovem aprendiz! Eu sou o Mago Sábio."],
+    ["😈","O vilão Bagunço espalhou confusão e enigmas por todo o Reino Mágico!"],
+    ["🦉","Eu sou o Corujito! Vou te dar dicas quando você precisar. É só tocar em mim."],
+    ["⭐","Acerte os desafios para ganhar estrelas e moedas. Sem erros = 3 estrelas!"],
+    ["🪄","Pronto para salvar o reino? Vamos começar pela Floresta da Soma!"]
+  ]; let i=0;
+  const show=()=>{ const [e,t]=steps[i]; overlay(`<p style="font-size:72px;margin:0">${e}</p><p style="font-size:21px">${t}</p>
+    <div class="btncol"><button class="btn" id="tut-n">${i<steps.length-1?"Continuar ▶":"Vamos lá! 🚀"}</button></div>`);
+    if(P.settings.voice) speak(t);
+    $("#tut-n").onclick=()=>{ sfx.tap(); i++; if(i<steps.length) show(); else { closeOverlay(); P.tutorialSeen=true; P.coins+=5; save(); toast("+5 🪙 por completar o tutorial!"); curRegion=0; go("levels"); } }; };
+  show();
+}
+
+/* ---------- eventos ---------- */
+$("#btn-play").onclick=()=>{ sfx.tap(); if(!P.tutorialSeen) tutorial(); else go("map"); };
+$("#btn-shop-home").onclick=()=>{ sfx.tap(); go("shop"); };
+$("#btn-settings-home").onclick=()=>{ sfx.tap(); go("settings"); };
+$("#btn-help").onclick=()=>{ sfx.tap(); tutorial(); };
+$("#btn-pause").onclick=()=>{ sfx.tap(); pauseGame(); };
+$("#btn-speak").onclick=()=>{ if(G&&G.current) speak(G.current.text+". "+(G.current.speech||stripTags(G.current.visual))); };
+$("#g-mascot").onclick=giveHint;
+$("#btn-reward").onclick=()=>{ sfx.tap(); rewardedAd(); };
+$$("[data-go]").forEach(b=>b.onclick=()=>{ sfx.tap(); const t=b.dataset.go;
+  if(t==="back" && previous==="game"){ previous="levels"; $$(".screen").forEach(s=>s.classList.toggle("active", s.id==="s-game")); current="game"; refresh(); return; }
+  go(t); });
+
+// expõe para testes automatizados
+window.__AM = {GEN, P:()=>P, startLevel, REGIONS, G:()=>G};
+
+load(); refresh();
+})();
+</script>
+</body>
+</html>
