@@ -19,6 +19,11 @@ js/
   game.js           fase em andamento
   audio.js          sons e voz
   ads.js            anúncios SIMULADOS
+  account.js        Conta da família: login, perfis, sincronização e telas
+  cloud.js          cliente do Supabase (login por e-mail + tabela child_profiles), só com fetch
+  cloud-config.js   endereço e chave PÚBLICA do Supabase
+  sync.js           junta progresso do aparelho com o da nuvem          (puro, testado)
+supabase/schema.sql tabela, regras de segurança (RLS), limite de perfis, apagar conta
 scripts/build.mjs   gera dist/aventura-matematica-v<versão>.html (arquivo único)
 tests/              testes de lógica (node --test) e e2e/smoke.py (navegador)
 ```
@@ -27,12 +32,31 @@ tests/              testes de lógica (node --test) e e2e/smoke.py (navegador)
 neles, o que permite testá-las e, na v1.3, sincronizar o progresso com a nuvem trocando só o
 armazenamento (`loadProgress(storage)` / `saveProgress(storage)`).
 
+## Conta da família (v1.3)
+- **Supabase** (projeto `aventura-matematica`, região São Paulo). Conta = adulto; até 6 perfis de criança
+  na tabela `child_profiles` (`name` + `progress` em JSON). RLS: cada conta só acessa os próprios perfis.
+- **Login sem senha:** `POST /auth/v1/otp` envia o e-mail; o link volta para o jogo com `#access_token`
+  (lido por `useAuthHash`) ou o código é verificado em `/auth/v1/verify`.
+- **Local primeiro:** cada perfil tem uma cópia no aparelho (`aventura-matemagica-v1:perfil:<id>`).
+  Cada salvamento agenda o envio para a nuvem; sem internet, fica pendente e é enviado no evento `online`.
+- **Mesclagem** (`sync.js`): melhor nota de cada nível, itens somados; moedas/nome/configurações do lado mais recente.
+- **Apagar conta:** função `delete_my_account()` no banco apaga o usuário e, em cascata, os perfis.
+
+### Pendências antes de abrir para outras famílias
+1. **E-mail próprio (SMTP):** o envio de e-mails padrão do Supabase só entrega para membros da organização
+   e no máximo 2 por hora. É preciso ligar um serviço de e-mail (ex.: Resend ou Brevo) em
+   *Authentication → Emails → SMTP*. Com SMTP próprio também dá para colocar o **código** no e-mail
+   (`{{ .Token }}`), útil para os apps de celular.
+2. **Política de privacidade e termos** (v1.5).
+3. Login com Apple/Google (opcional, junto com os apps na v1.4).
+
 ## Como trabalhar
 | Comando | O que faz |
 |---|---|
 | `npm test` | roda os testes de lógica |
 | `npm run build` | gera o arquivo único em `dist/` |
 | `python3 tests/e2e/smoke.py` | joga no navegador (precisa de Playwright) |
+| `python3 tests/e2e/account.py` | testa a Conta da família com Supabase simulado e 2 aparelhos |
 | `python3 -m http.server` | serve o jogo em http://localhost:8000 |
 
 > Abrir `index.html` com dois cliques **não funciona** (navegadores bloqueiam módulos em
@@ -43,7 +67,6 @@ armazenamento (`loadProgress(storage)` / `saveProgress(storage)`).
 - Cada pedido novo = nova versão, um PR, entrada no `CHANGELOG.md` e arquivos entregues com a versão no nome.
 
 ## Próximas etapas
-- **v1.3** – conta do responsável + perfis das crianças + progresso na nuvem (Supabase).
 - **v1.4** – apps iOS/Android com Capacitor.
 - **v1.5** – materiais das lojas (privacidade, termos, prints).
 - **v2.0** – publicação. Antes disso, rever a monetização: as regras da Apple para a categoria

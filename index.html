@@ -21,7 +21,8 @@
       <p>Salve o reino com feitiços de matemática!</p>
     </div>
     <div class="center">
-      <div class="hello" id="home-hello"></div>
+      <div class="hello"><span id="home-hello"></span> <span id="home-cloud" title="Progresso salvo na conta"></span></div>
+      <button class="btn ghost small" id="btn-switch" hidden>👥 Trocar jogador</button>
       <div class="avatar-line" style="justify-content:center"><span class="avatar" id="home-avatar"></span><span id="home-rank"></span></div>
       <button class="btn big" id="btn-play">▶ Jogar</button>
     </div>
@@ -102,13 +103,15 @@
     <div style="overflow-y:auto;flex:1">
       <div class="set-row">🎵 Sons <span class="toggle" data-set="sound"></span></div>
       <div class="set-row">🔊 Ler perguntas em voz alta <span class="toggle" data-set="voice"></span></div>
+      <div class="set-row">☁️ Conta da família <button class="btn small" id="btn-account"><span id="acc-label">Entrar</span></button></div>
+      <p class="sync-status" id="sync-status"></p>
       <div class="set-row">🧒 Nome do jogador <button class="btn small" id="btn-name">✏️ <span id="set-name"></span></button></div>
       <div class="set-row">🔠 Letras maiores <span class="toggle" data-set="bigText"></span></div>
       <div class="set-row">📺 Anúncios (área dos pais) <span class="toggle" data-set="ads" data-parent="1"></span></div>
       <h2 style="font-size:22px;margin:16px 0 6px">👨‍👩‍👧 Para os pais</h2>
       <div class="parent-note">
         Jogo educativo para crianças de 6 a 8 anos: adição e subtração até 20, sequências, comparação de números, formas geométricas e raciocínio lógico.<br><br>
-        O progresso fica salvo só neste aparelho. Nenhum dado pessoal é coletado.<br><br>
+        Sem conta, o progresso fica salvo só neste aparelho. Com a <b>Conta da família</b> (opcional), ele fica guardado na nuvem e continua em qualquer aparelho: guardamos o e-mail do adulto e, das crianças, só o apelido e o progresso no jogo. Dá para apagar tudo a qualquer momento.<br><br>
         Os anúncios desta versão são <b>apenas simulações</b> (nada real é exibido). Banners só aparecem nos menus, nunca durante o jogo.
       </div>
       <button class="btn ghost" id="btn-reset" style="margin-top:14px;width:100%">🗑️ Apagar progresso</button>

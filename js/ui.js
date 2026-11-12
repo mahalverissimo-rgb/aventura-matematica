@@ -4,6 +4,7 @@ import { pick, rnd } from "./util.js";
 import { VERSION, HAT_E } from "./config.js";
 import { P, totalStars, rank, currentPet } from "./progress.js";
 import { renderMap, renderLevels, renderShop, renderSettings } from "./screens.js";
+import { renderAccountBits } from "./account.js";
 
 /** Estado da navegação. */
 export const nav = { current: "home", previous: "home", region: 0 };
@@ -40,6 +41,7 @@ export function refresh() {
   $("#home-hello").textContent = P.name ? `Olá, ${P.name}! 👋` : "";
   $("#set-name").textContent = P.name || "definir";
   $("#app-version").textContent = VERSION;
+  renderAccountBits();
   document.body.style.fontSize = P.settings.bigText ? "112%" : "";
   $$(".qtext").forEach((e) => (e.style.fontSize = P.settings.bigText ? "30px" : ""));
   if (nav.current === "map") renderMap();
