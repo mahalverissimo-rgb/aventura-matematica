@@ -1,5 +1,15 @@
 # Histórico de versões
 
+## 1.5 — 13/11/2026
+**Privacidade, termos e suporte (preparação para as lojas).**
+- Páginas **Política de Privacidade**, **Termos de Uso** e **Suporte**, com a seção **Excluir conta** acessível pela web (exigência do Google Play). Responsável: Veritech · suporte@veritech.me.
+- **Consentimento do responsável** em destaque e obrigatório para criar a Conta da família (LGPD art. 14), registrado com data e versão da política.
+- **Ver meus dados:** o responsável vê (e copia) tudo o que a conta guarda.
+- **Nada carregado de terceiros:** a fonte Baloo 2 agora vem junto com o jogo (antes vinha do Google Fonts).
+- Links para as páginas nas Configurações; páginas também funcionam sem internet e dentro dos apps.
+- Materiais das lojas: textos, respostas dos formulários de privacidade e prints em `docs/LOJAS.md` e `docs/lojas/`.
+- 70 testes de lógica; testes de ponta a ponta cobrem consentimento e "Ver meus dados".
+
 ## 1.4 — 12/11/2026
 **Apps de celular (para testar, ainda fora das lojas).**
 - **App instalável pelo navegador:** ícone próprio, tela cheia e funciona **sem internet** depois da primeira visita (iPhone e Android).

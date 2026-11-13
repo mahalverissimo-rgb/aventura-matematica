@@ -1,3 +1,5 @@
+/* Fonte Baloo 2 (licença OFL, fonts/OFL-Baloo2.txt) servida pelo próprio jogo: nada é baixado de terceiros. */
+@font-face{font-family:"Baloo 2";src:url("../fonts/baloo2.woff") format("woff");font-weight:400 800;font-display:swap}
 :root{
   --sky1:#2b1b5a; --sky2:#5b2a86; --gold:#ffcf3f; --gold2:#ffb000;
   --ink:#2a2140; --paper:#fff8ec; --ok:#3fbf6b; --bad:#ff5d73; --mint:#5fe0c8;
@@ -114,6 +116,12 @@ h1,h2{margin:0;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.25)}
 #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#fff;color:#2a2140;padding:10px 18px;border-radius:18px;font-weight:800;font-size:18px;z-index:40;box-shadow:0 6px 0 rgba(0,0,0,.2);text-align:center;max-width:90%;transition:opacity .3s;pointer-events:none}
 .spark{position:fixed;font-size:22px;z-index:30;pointer-events:none;transition:all .7s ease-out}
 .pg-input{font:inherit;font-size:26px;width:140px;text-align:center;border-radius:14px;border:2px solid #ccc;padding:6px;user-select:text;-webkit-user-select:text}
+.legal-links{text-align:center;font-size:15px;margin:12px 0 0}
+.legal-links a{color:#fff;font-weight:700}
+.consent{display:flex;gap:10px;align-items:flex-start;text-align:left;background:#fff;border:3px solid #ffcf3f;border-radius:14px;padding:10px 12px;margin:10px 0;font-size:15.5px;line-height:1.35}
+.consent input{width:26px;height:26px;flex:none;margin-top:2px;accent-color:#5b2a86}
+.consent a{color:#5b2a86;font-weight:800}
+.data-box{text-align:left;background:#fff;border-radius:12px;padding:8px 10px;font-size:13px;max-height:38vh;overflow:auto;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,Menlo,monospace;user-select:text;-webkit-user-select:text}
 .sync-status{color:#e8dcff;font-size:15px;margin:-2px 4px 8px;min-height:0}
 .sync-status:empty{display:none}
 #home-cloud{font-size:20px}

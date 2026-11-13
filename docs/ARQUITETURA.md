@@ -27,6 +27,9 @@ native.js         (em js/) app de celular: botão voltar, detecção do app, reg
 sw.js               guarda o jogo no aparelho (funciona sem internet)
 manifest.webmanifest app instalável (nome, ícones, cores)
 capacitor.config.json / scripts/build-www.mjs   apps iOS/Android (ver docs/APPS.md)
+privacidade.html, termos.html, suporte.html (+ css/paginas.css)   páginas legais e de suporte
+fonts/              fonte Baloo 2 (OFL) servida pelo próprio jogo, sem terceiros
+docs/LOJAS.md, docs/lojas/   textos, formulários de privacidade e prints das lojas
 assets/, icons/     ícone (vetor em assets/icon.svg), ícones do navegador e tela de abertura
 supabase/schema.sql tabela, regras de segurança (RLS), limite de perfis, apagar conta
 scripts/build.mjs   gera dist/aventura-matematica-v<versão>.html (arquivo único)

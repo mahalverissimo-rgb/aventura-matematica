@@ -1,0 +1,26 @@
+/* Páginas de texto (privacidade, termos, suporte) */
+@font-face{font-family:"Baloo 2";src:url("../fonts/baloo2.woff") format("woff");font-weight:400 800;font-display:swap}
+*{box-sizing:border-box}
+html{background:#2b1b5a}
+body{margin:0;font-family:"Baloo 2",system-ui,"Segoe UI",Roboto,sans-serif;color:#2a2140;line-height:1.55;font-size:17px;
+  background:radial-gradient(ellipse at top,#5b2a86,#2b1b5a 70%) fixed;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.topo{max-width:760px;margin:0 auto;padding:18px 18px 6px;display:flex;align-items:center;gap:12px;color:#fff}
+.topo a.voltar{background:#ffcf3f;color:#2a2140;text-decoration:none;font-weight:800;border-radius:16px;padding:6px 14px;box-shadow:0 4px 0 rgba(0,0,0,.18)}
+.topo .marca{font-weight:800;font-size:20px}
+main{max-width:760px;margin:10px auto 30px;background:#fff8ec;border-radius:24px;padding:22px 24px 26px;box-shadow:0 8px 0 rgba(0,0,0,.2)}
+h1{font-size:30px;line-height:1.1;margin:0 0 4px;color:#5b2a86}
+h2{font-size:21px;margin:22px 0 6px;color:#2b1b5a;border-bottom:3px solid #ffcf3f;padding-bottom:2px}
+h3{font-size:18px;margin:14px 0 4px}
+p,li{margin:6px 0}
+ul{padding-left:22px}
+.data{color:#6b5f86;font-size:15px;margin-bottom:12px}
+.resumo{background:#e9fbf7;border-left:6px solid #5fe0c8;border-radius:12px;padding:10px 16px;margin:12px 0}
+.alerta{background:#fff0f6;border-left:6px solid #ff8fb6;border-radius:12px;padding:10px 16px;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:15.5px;margin:8px 0}
+th,td{border:1px solid #e3d9f5;padding:6px 8px;text-align:left;vertical-align:top}
+th{background:#f3edff}
+a{color:#5b2a86;font-weight:700}
+.botao{display:inline-block;background:#ffcf3f;color:#2a2140;text-decoration:none;border-radius:18px;padding:8px 16px;font-weight:800;box-shadow:0 4px 0 rgba(0,0,0,.15);margin:4px 0}
+nav.links{max-width:760px;margin:0 auto 30px;text-align:center;color:#e8dcff;font-size:15px}
+nav.links a{color:#fff}
+code{background:#f3edff;border-radius:6px;padding:1px 5px}

@@ -18,6 +18,7 @@ test("service worker guarda todos os arquivos do jogo", () => {
   const jsFiles = readdirSync(new URL("../js/", import.meta.url)).filter((f) => f.endsWith(".js"));
   for (const f of jsFiles) assert.ok(sw.includes(`"js/${f}"`), `sw.js não guarda js/${f}`);
   for (const f of ["index.html", "css/style.css", "manifest.webmanifest"]) assert.ok(sw.includes(`"${f}"`), f);
+  for (const m of sw.match(/"((?:fonts|css)\/[^"]+|[a-z]+\.html)"/g)) assert.ok(existsSync(new URL("../" + m.slice(1, -1), import.meta.url)), `falta ${m}`);
   for (const m of sw.match(/"(icons\/[^"]+)"/g)) assert.ok(existsSync(new URL("../" + m.slice(1, -1), import.meta.url)), `falta ${m}`);
 });
 
@@ -34,6 +35,7 @@ test("manifesto do app instalável é válido e os ícones existem", () => {
 });
 
 test("pasta dos apps (www) tem tudo e não depende de fontes da internet", () => {
+  // (a partir da v1.5 a fonte vem junto do jogo)
   const out = buildWww(mkdtempSync(join(tmpdir(), "www-")));
   for (const f of WWW_FILES) assert.ok(existsSync(join(out, f)), f);
   const html = readFileSync(join(out, "index.html"), "utf8");

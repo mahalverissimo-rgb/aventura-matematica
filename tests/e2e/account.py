@@ -18,6 +18,7 @@ CODE = "123456"
 class FakeSupabase:
     def __init__(self):
         self.profiles, self.tokens, self.sent, self.offline, self.seq = [], {}, [], False, 0
+        self.consents = []
 
     def issue(self, email):
         self.seq += 1
@@ -49,7 +50,7 @@ class FakeSupabase:
                                  body="" if data is None else json.dumps(data))
 
         if u.path == "/auth/v1/otp":
-            self.sent.append(body["email"]); return await reply(200, {})
+            self.sent.append(body["email"]); self.consents.append(body.get("data")); return await reply(200, {})
         if u.path == "/auth/v1/verify":
             if body["token"] != CODE:
                 return await reply(403, {"msg": "Token has expired or is invalid"})
@@ -155,8 +156,12 @@ async def main():
         # ---------- entra na conta com código e guarda o progresso ----------
         await open_account(A, url)
         await A.fill("#acc-email", "mae@exemplo.com"); await A.click("#acc-send")
+        await A.wait_for_timeout(300)
+        assert fake.sent == [], "sem a autorização do responsável não pode enviar"
+        await A.check("#acc-consent"); await A.click("#acc-send")
         await A.wait_for_selector("#acc-code")
         assert fake.sent == ["mae@exemplo.com"]
+        assert fake.consents[0]["consent_version"] == "1.5" and fake.consents[0]["consent_by"] == "responsavel"
         await A.fill("#acc-code", "000000"); await A.click("#acc-verify")
         await A.wait_for_timeout(300)
         assert await A.is_visible("#acc-code"), "código errado não pode entrar"
@@ -224,6 +229,16 @@ async def main():
         await A.wait_for_timeout(600)
         assert await A.evaluate("__AM.P().stars[2]") == 3
         print("✔ aparelho A recebe o progresso feito no aparelho B")
+
+        # ---------- ver meus dados ----------
+        await open_account(A, url)
+        await A.click("#mg-data")
+        dados = json.loads(await A.inner_text("#dt-json"))
+        assert dados["conta"]["email"] == "mae@exemplo.com"
+        assert sorted(j["apelido"] for j in dados["jogadores"]) == ["Sofia", "Teo"]
+        assert dados["jogadores"][0]["progresso"]["stars"]
+        await A.click("#dt-back"); await A.click("#mg-close")
+        print("✔ ver meus dados mostra tudo o que a conta guarda")
 
         # ---------- apagar a conta ----------
         await open_account(A, url)

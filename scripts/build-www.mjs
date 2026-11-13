@@ -5,7 +5,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-export const WWW_FILES = ["index.html", "manifest.webmanifest", "css", "js", "icons"];
+export const WWW_FILES = ["index.html", "manifest.webmanifest", "css", "js", "icons", "fonts", "privacidade.html", "termos.html", "suporte.html"];
 
 export function buildWww(out = join(ROOT, "www")) {
   rmSync(out, { recursive: true, force: true });
