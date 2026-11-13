@@ -98,9 +98,11 @@ export function createCloud({ url, key, fetchFn, storage, now = () => Date.now()
     get email() { return session ? session.email : ""; },
 
     /** Envia o e-mail de acesso (link e, se o modelo de e-mail tiver, um código). */
-    async sendLoginEmail(email, redirectTo) {
+    async sendLoginEmail(email, redirectTo, data) {
       const qs = redirectTo ? `?redirect_to=${encodeURIComponent(redirectTo)}` : "";
-      await raw(`/auth/v1/otp${qs}`, { method: "POST", body: { email, create_user: true } });
+      const body = { email, create_user: true };
+      if (data) body.data = data;   // guardado no cadastro do usuário (ex.: registro do consentimento)
+      await raw(`/auth/v1/otp${qs}`, { method: "POST", body });
     },
 
     /** Entra com o código de 6 a 8 dígitos do e-mail. */

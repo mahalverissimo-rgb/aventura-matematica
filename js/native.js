@@ -37,6 +37,11 @@ export function initNative() {
     try {
       window.Capacitor.Plugins.App.addListener("backButton", handleBackButton);
     } catch (e) { /* plugin indisponível */ }
+    // Páginas do próprio jogo (privacidade, termos) abrem dentro do app, não numa aba nova.
+    document.addEventListener("click", (ev) => {
+      const a = ev.target.closest && ev.target.closest('a[target="_blank"]');
+      if (a && !/^https?:/i.test(a.getAttribute("href") || "")) { ev.preventDefault(); location.href = a.getAttribute("href"); }
+    });
     return;
   }
   // Navegador: registra o service worker para funcionar sem internet (só em http/https).

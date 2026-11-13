@@ -119,7 +119,7 @@ async def main():
         txt = await pg.inner_text("#ov-panel")
         a, c = map(int, re.search(r"(\d+) × (\d+)", txt).groups())
         await pg.fill("#pg", str(a * c)); await pg.click("#pg-ok")
-        await pg.fill("#acc-email", "mae@exemplo.com"); await pg.click("#acc-send")
+        await pg.fill("#acc-email", "mae@exemplo.com"); await pg.check("#acc-consent"); await pg.click("#acc-send")
         await pg.wait_for_selector("#acc-code")
         panel = await pg.inner_text("#ov-panel")
         assert "código de 6 números" in panel and "Entrar no jogo" not in panel, panel

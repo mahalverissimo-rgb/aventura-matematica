@@ -55,7 +55,9 @@ export function build() {
   const version = (read("js/config.js").match(/VERSION\s*=\s*"([^"]+)"/) || [])[1];
   if (!version) throw new Error("VERSION não encontrada em js/config.js");
   let html = read("index.html");
-  const css = read("css/style.css");
+  // fonte embutida no arquivo único (para abrir sem internet e sem servidor)
+  const font = readFileSync(join(ROOT, "fonts/baloo2.woff")).toString("base64");
+  const css = read("css/style.css").replace('url("../fonts/baloo2.woff")', `url("data:font/woff;base64,${font}")`);
   html = html.replace(/<link rel="stylesheet" href="css\/style\.css">/, () => `<style>\n${css}</style>`);
   html = html.replace(/<script type="module" src="js\/main\.js"><\/script>/, () => `<script>\n${bundle()}\n</script>`);
   if (html.includes('src="js/') || html.includes('href="css/')) throw new Error("index.html ainda referencia arquivos externos");

@@ -17,6 +17,8 @@ const ACTIVE_PROFILE_KEY = "aventura-matemagica-perfil-ativo";
 const GUEST_IMPORTED_KEY = "aventura-matemagica-convidado-importado";
 const MAX_PROFILES = 6;
 const PUSH_DELAY_MS = 1200;
+/** Versão da Política de Privacidade aceita no consentimento. */
+export const CONSENT_VERSION = "1.5";
 
 /** Estado da conta (null/vazio = sem conta). */
 export const account = { cloud: null, profiles: [], activeId: null, status: "", pending: false, pushTimer: null };
@@ -271,18 +273,25 @@ function redirectUrl() {
 function loginPanel() {
   overlay(`<p style="font-size:56px;margin:0">☁️</p><h2>Conta da família</h2>
     <p>Com uma conta, o progresso das crianças fica salvo na nuvem e continua em qualquer aparelho.</p>
-    <p class="acc-note">A conta é do adulto responsável. Das crianças guardamos só o apelido e o progresso no jogo. Sem senha: você entra pelo link que chega no e-mail.</p>
+    <p class="acc-note">A conta é do adulto responsável. Das crianças guardamos só o apelido e o progresso no jogo. Sem senha: você entra pelo código que chega no e-mail.</p>
     <input class="name-input" id="acc-email" type="email" inputmode="email" autocomplete="email" placeholder="seu e-mail">
+    <label class="consent"><input type="checkbox" id="acc-consent">
+      <span>Sou maior de 18 anos, <b>responsável pelas crianças</b> que vão jogar, e autorizo o uso do meu e-mail e do apelido e progresso delas conforme a <a href="privacidade.html" target="_blank">Política de Privacidade</a> e os <a href="termos.html" target="_blank">Termos de Uso</a>.</span></label>
     <div class="btncol"><button class="btn" id="acc-send">📧 Enviar e-mail de acesso</button><button class="btn ghost" id="acc-cancel">Cancelar</button></div>`);
   const inp = $("#acc-email");
   $("#acc-cancel").onclick = closeOverlay;
   $("#acc-send").onclick = async () => {
     const email = inp.value.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { sfx.bad(); toast("Digite um e-mail válido."); return; }
+    if (!$("#acc-consent").checked) { sfx.bad(); toast("Para criar a conta, o responsável precisa marcar a autorização."); return; }
     const btn = $("#acc-send");
     btn.disabled = true; btn.textContent = "Enviando…";
     try {
-      await account.cloud.sendLoginEmail(email, redirectUrl());
+      await account.cloud.sendLoginEmail(email, redirectUrl(), {
+        consent_version: CONSENT_VERSION,
+        consent_at: new Date().toISOString(),
+        consent_by: "responsavel"
+      });
       codePanel(email);
     } catch (e) {
       btn.disabled = false; btn.textContent = "📧 Enviar e-mail de acesso";
@@ -366,6 +375,7 @@ function managePanel() {
     <div class="btncol">
       <button class="btn" id="mg-choose">👥 Escolher ou criar jogador</button>
       <button class="btn ghost" id="mg-sync">🔄 Sincronizar agora</button>
+      <button class="btn ghost" id="mg-data">📄 Ver meus dados</button>
       <button class="btn ghost" id="mg-out">🚪 Sair da conta neste aparelho</button>
       <button class="btn ghost danger" id="mg-delete">Apagar conta e todos os dados</button>
       <button class="btn ghost" id="mg-close">Fechar</button>
@@ -373,9 +383,35 @@ function managePanel() {
   $$("#ov-panel [data-del]").forEach((b) => (b.onclick = () => confirmRemoveProfile(account.profiles[Number(b.dataset.del)])));
   $("#mg-choose").onclick = () => chooserPanel({ parent: true });
   $("#mg-sync").onclick = async () => { await syncNow(); managePanel(); };
+  $("#mg-data").onclick = dataPanel;
   $("#mg-out").onclick = async () => { await signOutAccount(); closeOverlay(); go("home"); toast("Você saiu da conta. O progresso continua salvo na nuvem."); };
   $("#mg-delete").onclick = confirmDeleteAccount;
   $("#mg-close").onclick = closeOverlay;
+}
+
+/** Todos os dados da conta guardados na nuvem, em formato legível (direito de acesso – LGPD art. 18). */
+export function accountDataExport() {
+  return {
+    conta: { email: account.cloud.email },
+    jogadores: account.profiles.map((p) => ({ apelido: p.name, atualizado_em: p.updated_at, progresso: normalizeProgress(p.progress) })),
+    exportado_em: new Date().toISOString()
+  };
+}
+
+async function dataPanel() {
+  try { await loadProfiles(); } catch (e) { /* mostra o que já tem */ }
+  const json = JSON.stringify(accountDataExport(), null, 2);
+  overlay(`<h2>📄 Meus dados</h2>
+    <p class="acc-note">Isto é tudo o que a conta guarda na nuvem: o e-mail do responsável e, de cada jogador, o apelido e o progresso.</p>
+    <div class="data-box" id="dt-json">${esc(json)}</div>
+    <div class="btncol"><button class="btn" id="dt-copy">📋 Copiar</button>
+      <a class="btn ghost" style="text-decoration:none" href="privacidade.html" target="_blank">Política de Privacidade</a>
+      <button class="btn ghost" id="dt-back">Voltar</button></div>`);
+  $("#dt-back").onclick = managePanel;
+  $("#dt-copy").onclick = async () => {
+    try { await navigator.clipboard.writeText(json); toast("Dados copiados."); }
+    catch (e) { toast("Não foi possível copiar. Selecione o texto e copie."); }
+  };
 }
 
 function confirmRemoveProfile(p) {

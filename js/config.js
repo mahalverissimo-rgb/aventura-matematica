@@ -1,6 +1,6 @@
 // Configurações e conteúdo fixo do jogo.
 
-export const VERSION = "1.4";
+export const VERSION = "1.5";
 
 export const LEVELS_PER_REGION = 5;
 export const QUESTIONS_PER_LEVEL = 5;

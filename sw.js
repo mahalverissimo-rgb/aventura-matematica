@@ -1,6 +1,6 @@
 // Service worker: guarda o jogo no aparelho para abrir e jogar sem internet.
 // A versão no nome do cache faz o aparelho baixar os arquivos novos a cada versão.
-const VERSION = "1.4";
+const VERSION = "1.5";
 const CACHE = `aventura-matematica-v${VERSION}`;
 const ASSETS = [
   "./",
@@ -11,7 +11,8 @@ const ASSETS = [
   "js/progress.js", "js/audio.js", "js/ui.js", "js/screens.js", "js/game.js", "js/ads.js",
   "js/account.js", "js/cloud.js", "js/cloud-config.js", "js/sync.js", "js/native.js",
   "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png",
-  "icons/apple-touch-icon.png", "icons/favicon-32.png"
+  "icons/apple-touch-icon.png", "icons/favicon-32.png",
+  "fonts/baloo2.woff", "privacidade.html", "termos.html", "suporte.html", "css/paginas.css"
 ];
 
 self.addEventListener("install", (e) => {

@@ -21,11 +21,15 @@ Jogo educativo de matemática e enigmas para crianças de 6 a 8 anos.
 
 Detalhes em [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
 
+## Privacidade
+[Política de Privacidade](https://mahalverissimo-rgb.github.io/aventura-matematica/privacidade.html) · [Termos de Uso](https://mahalverissimo-rgb.github.io/aventura-matematica/termos.html) · [Suporte e exclusão de conta](https://mahalverissimo-rgb.github.io/aventura-matematica/suporte.html) · Materiais das lojas: [docs/LOJAS.md](docs/LOJAS.md)
+
 ## Manual
-📘 [Manual do jogo (PDF) – v1.4](docs/Manual-Aventura-Matemagica-v1.4.pdf)
+📘 [Manual do jogo (PDF) – v1.5](docs/Manual-Aventura-Matemagica-v1.5.pdf)
 
 ## Versões
 Histórico completo em [CHANGELOG.md](CHANGELOG.md).
+- **1.5** – Política de Privacidade, Termos, Suporte e exclusão de conta; consentimento do responsável; "Ver meus dados"; fonte sem terceiros; materiais das lojas.
 - **1.4** – app instalável e sem internet, .apk do Android e projeto do iPhone, ícone novo.
 - **1.3** – Conta da família: progresso na nuvem, vários jogadores, funciona sem internet.
 - **1.2** – código organizado em módulos, testes automáticos e arquivo único com a versão no nome.
